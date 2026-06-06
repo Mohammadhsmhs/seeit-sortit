@@ -44,14 +44,25 @@ export type VLMReport = {
   enrichment: VLMEnrichment;
 };
 
+export type ClassificationHints = {
+  latitude?: number;
+  longitude?: number;
+  borough?: string;
+  text_description?: string;
+};
+
 /**
  * Submit a captured photo to /analyse-report.
  * Returns parsed response or null (disabled / failure / timeout).
  * Never throws — caller falls through to mock UI.
+ *
+ * Hints (lat/lon/borough) are optional but strongly recommended — the model
+ * uses them to ground its classification and the backend uses them for
+ * borough-correct enrichment (TfL delay, density, scoring).
  */
 export async function submitPhotoForClassification(
   photoUri: string,
-  textDescription?: string,
+  hints: ClassificationHints = {},
 ): Promise<VLMReport | null> {
   if (!VLM_BASE_URL) return null;
 
@@ -65,9 +76,10 @@ export async function submitPhotoForClassification(
       name: 'photo.jpg',
       type: 'image/jpeg',
     } as unknown as Blob);
-    if (textDescription) {
-      form.append('text_description', textDescription);
-    }
+    if (hints.text_description) form.append('text_description', hints.text_description);
+    if (hints.borough)          form.append('borough', hints.borough);
+    if (hints.latitude  != null) form.append('latitude',  String(hints.latitude));
+    if (hints.longitude != null) form.append('longitude', String(hints.longitude));
 
     const res = await fetch(`${VLM_BASE_URL}${ENDPOINT_PATH}`, {
       method: 'POST',

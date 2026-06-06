@@ -377,13 +377,15 @@ function CameraScreen({
     }
   }, [permission, requestPermission]);
 
-  // Resolve current location → borough on mount (best-effort; null if denied)
-  async function resolveBorough(): Promise<BoroughHit | null> {
+  // Get GPS once, then derive borough locally. Returns null if denied.
+  async function getCoordsAndBorough(): Promise<{ lat: number; lon: number; hit: BoroughHit | null } | null> {
     try {
       const perm = await Location.requestForegroundPermissionsAsync();
       if (perm.status !== 'granted') return null;
       const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      return findBoroughForLocation(loc.coords.latitude, loc.coords.longitude);
+      const lat = loc.coords.latitude;
+      const lon = loc.coords.longitude;
+      return { lat, lon, hit: findBoroughForLocation(lat, lon) };
     } catch {
       return null;
     }
@@ -401,16 +403,20 @@ function CameraScreen({
   const runClassification = async (impact: Haptics.ImpactFeedbackStyle, photoUri?: string) => {
     Haptics.impactAsync(impact);
     setPhase('analysing');
-    // Hit the VLM and resolve location in parallel. If VLM is unconfigured or
-    // unreachable, submitPhotoForClassification returns null and we fall back
-    // to the mock pothole below.
-    const minPause = new Promise(r => setTimeout(r, 800));
-    const [resolved, vlmReport] = await Promise.all([
-      resolveBorough(),
-      photoUri ? submitPhotoForClassification(photoUri) : Promise.resolve(null),
-      minPause,
+    // 1) GPS first (~100ms) — sequential so the VLM call can use the coords.
+    const where = await getCoordsAndBorough();
+    setHit(where?.hit ?? null);
+    // 2) VLM with grounding hints, parallel with a min 800ms dramatic pause.
+    const [vlmReport] = await Promise.all([
+      photoUri
+        ? submitPhotoForClassification(photoUri, {
+            latitude: where?.lat,
+            longitude: where?.lon,
+            borough: where?.hit?.borough.name,
+          })
+        : Promise.resolve(null),
+      new Promise(r => setTimeout(r, 800)),
     ]);
-    setHit(resolved);
     setVlm(vlmReport);
     setPhase('classified');
     Animated.spring(drawer, { toValue: 1, useNativeDriver: true, bounciness: 6 }).start();
