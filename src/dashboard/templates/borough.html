@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ borough }} &mdash; Sorted</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────── -->
+<header class="header">
+  <span class="header-logo">S.</span>
+  <h1>Sorted &mdash; Borough Performance Dashboard</h1>
+  <span class="header-right" id="reportCount"></span>
+</header>
+
+<!-- ── Nav bar ─────────────────────────────────────────────────────── -->
+<nav style="background:#fff;border-bottom:1px solid var(--grey-200);padding:0 2rem;display:flex;gap:0;align-items:center;">
+  <a href="/dashboard" style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--grey-600);text-decoration:none;border-bottom:3px solid transparent;">Dashboard</a>
+  <a href="/dashboard/categories" style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--grey-600);text-decoration:none;border-bottom:3px solid transparent;">Categories</a>
+  <a href="/processed" style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--grey-600);text-decoration:none;border-bottom:3px solid transparent;">Processed Issues</a>
+  <a href="/intake" style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--grey-600);text-decoration:none;border-bottom:3px solid transparent;">Submit Issue</a>
+  <span style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--navy);border-bottom:3px solid var(--navy);">{{ borough }}</span>
+  <a href="/app" style="margin-left:auto;padding:.45rem .9rem;font-size:.82rem;font-weight:500;color:var(--grey-600);text-decoration:none;border:1px solid var(--grey-200);border-radius:6px;">Open consumer app &rarr;</a>
+</nav>
+
+<!-- ── Borough hero ────────────────────────────────────────────────── -->
+<section class="borough-hero">
+  <a class="back-link" href="/dashboard">&larr; All London</a>
+  <div class="borough-tag">Borough</div>
+  <h2>{{ borough }}</h2>
+  <div class="borough-sub" id="boroughSub">Performance overview</div>
+</section>
+
+<!-- ── KPIs ────────────────────────────────────────────────────────── -->
+<div class="kpi-strip">
+  <div class="kpi-card"><div class="value" id="kpiTotal">-</div><div class="label">Total Reports</div></div>
+  <div class="kpi-card"><div class="value" id="kpiResolvedPct">-</div><div class="label">% Resolved</div></div>
+  <div class="kpi-card"><div class="value" id="kpiMedian">-</div><div class="label">Median Resolution</div></div>
+  <div class="kpi-card"><div class="value" id="kpiAvg">-</div><div class="label">Avg Resolution</div></div>
+  <div class="kpi-card"><div class="value" id="kpiOpen">-</div><div class="label">Open Backlog</div></div>
+</div>
+
+<!-- ── Main grid ───────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- Borough map -->
+  <div class="panel full-width">
+    <div class="panel-header">
+      {{ borough }} Map
+      <span class="panel-header-hint">Click any dot for the full ticket</span>
+    </div>
+    <div class="map-tabs" role="tablist" aria-label="Map view">
+      <button type="button" class="map-tab active" id="tabMarkers" role="tab" aria-selected="true" aria-controls="mapMarkers" onclick="switchMapView('markers')">
+        <svg class="map-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Markers
+      </button>
+      <button type="button" class="map-tab" id="tabHeat" role="tab" aria-selected="false" aria-controls="mapHeat" onclick="switchMapView('heat')">
+        <svg class="map-tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s-4 5-4 9a4 4 0 0 0 8 0c0-4-4-9-4-9z"/><path d="M12 22a8 8 0 0 0 8-8"/><path d="M12 22a8 8 0 0 1-8-8"/></svg>
+        Heat Map
+      </button>
+      <span class="map-tab-spacer"></span>
+    </div>
+    <div class="map-wrap">
+      <div class="map-views">
+        <div class="map-view active" id="mapMarkersView">
+          <div id="mapMarkers"></div>
+        </div>
+        <div class="map-view" id="mapHeatView">
+          <div id="mapHeat"></div>
+        </div>
+      </div>
+      <div class="map-count-pill" id="mapCount">0 reports shown</div>
+      <button type="button" class="map-reset-btn" id="mapReset" onclick="resetMapView()" title="Reset to borough view" aria-label="Reset map view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><polyline points="21 3 21 8 16 8"/><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><polyline points="3 21 3 16 8 16"/></svg>
+      </button>
+      <div class="map-legend map-legend-split" id="legendMarkers" aria-label="Marker colour legend">
+        <div class="map-legend-title">Marker colour &mdash; age &amp; status</div>
+        <div class="map-legend-cols">
+          <div class="map-legend-col">
+            <div class="map-legend-col-title">Resolved</div>
+            <div class="map-legend-row"><span class="legend-dot legend-dot-green"></span><span class="legend-label">&lt; 7 days</span></div>
+            <div class="map-legend-row"><span class="legend-dot legend-dot-amber"></span><span class="legend-label">7&ndash;30 days</span></div>
+            <div class="map-legend-row"><span class="legend-dot legend-dot-red"></span><span class="legend-label">30+ days</span></div>
+          </div>
+          <div class="map-legend-col">
+            <div class="map-legend-col-title">Open</div>
+            <div class="map-legend-row"><span class="legend-dot legend-dot-open-fresh"></span><span class="legend-label">&lt; 7 days</span></div>
+            <div class="map-legend-row"><span class="legend-dot legend-dot-open-aging"></span><span class="legend-label">7&ndash;30 days</span></div>
+            <div class="map-legend-row"><span class="legend-dot legend-dot-open-overdue"></span><span class="legend-label">30+ days</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="map-legend map-legend-gradient" id="legendHeat" style="display:none" aria-label="Heat map intensity legend">
+        <div class="map-legend-title">Report density</div>
+        <div class="map-legend-gradient-bar" aria-hidden="true"></div>
+        <div class="map-legend-gradient-labels"><span>Cold</span><span>Hot</span></div>
+        <div class="map-legend-gradient-note">Cold = few or quickly-resolved reports.<br>Hot = many old or still-open reports.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Ticket drawer (sleek side-panel modal) ─────────────────────── -->
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+  <aside class="ticket-drawer" id="ticketDrawer" aria-hidden="true" aria-labelledby="drawerTitle">
+    <div class="drawer-shell">
+      <button class="drawer-close" type="button" onclick="closeDrawer()" aria-label="Close ticket">&times;</button>
+      <div class="drawer-content" id="drawerContent">
+        <div class="drawer-loading">
+          <div class="spinner"></div>
+          <span>Loading ticket&hellip;</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Category breakdown -->
+  <div class="panel">
+    <div class="panel-header">Category Breakdown</div>
+    <div class="panel-body"><div class="chart-container-tall"><canvas id="categoryChart"></canvas></div></div>
+  </div>
+
+  <!-- Resolution distribution -->
+  <div class="panel">
+    <div class="panel-header">Resolution Time Distribution</div>
+    <div class="panel-body"><div class="chart-container-tall"><canvas id="resolutionChart"></canvas></div></div>
+  </div>
+
+  <!-- These need attention -->
+  <div class="panel">
+    <div class="panel-header">These need attention</div>
+    <div class="panel-body">
+      <div class="cta-callout">Longest-open unresolved reports in {{ borough }} &mdash; ranked by days open.</div>
+      <ul class="attention-list" id="attentionList">
+        <li><div class="loading"><div class="spinner"></div></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Fastest wins -->
+  <div class="panel">
+    <div class="panel-header">Fastest resolutions</div>
+    <div class="panel-body">
+      <div class="win-callout">What {{ borough }} does well &mdash; tickets resolved fastest.</div>
+      <ul class="wins-list" id="winsList">
+        <li><div class="loading"><div class="spinner"></div></div></li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const BOROUGH = {{ borough|tojson }};
+const SLUG    = {{ slug|tojson }};
+
+/* ── State ─────────────────────────────────────────────────────────── */
+let allReports = [];
+let stats   = null;
+let categoryChart = null;
+let resolutionChart = null;
+
+/* Map state */
+let mapMarkers = null;
+let mapHeat = null;
+let markerGroup = null;    // Plain layer group of CircleMarkers
+let heatLayer = null;
+let currentMapView = "markers";
+let boroughBounds = null;
+
+const ticketCache = {};
+
+/* ── Init ──────────────────────────────────────────────────────────── */
+document.addEventListener("DOMContentLoaded", async () => {
+  initMaps();
+  try {
+    const [r, s] = await Promise.all([
+      fetch(`/api/borough/${SLUG}/reports`).then(r => r.json()),
+      fetch(`/api/borough/${SLUG}/stats`).then(r => r.json()),
+    ]);
+    allReports = Array.isArray(r) ? r : [];
+    stats = s;
+  } catch (e) {
+    document.getElementById("boroughSub").textContent = "Could not load borough data.";
+    return;
+  }
+  computeBoroughBounds();
+  if (boroughBounds) {
+    mapMarkers.fitBounds(boroughBounds, { padding: [30, 30], animate: false });
+  }
+  renderHero();
+  renderKPIs();
+  renderMap();
+  renderCategoryChart();
+  renderResolutionChart();
+  renderAttentionList();
+  renderWinsList();
+});
+
+/* ── Hero ──────────────────────────────────────────────────────────── */
+function renderHero() {
+  const parts = ["Performance overview"];
+  if (stats && stats.council) parts.push(stats.council);
+  document.getElementById("boroughSub").textContent = parts.join(" · ");
+  document.getElementById("reportCount").textContent = (stats?.total_reports ?? allReports.length) + " reports in this borough";
+}
+
+/* ── KPIs ──────────────────────────────────────────────────────────── */
+function renderKPIs() {
+  if (!stats) return;
+  document.getElementById("kpiTotal").textContent       = stats.total_reports ?? "-";
+  document.getElementById("kpiResolvedPct").textContent = (stats.pct_resolved != null ? stats.pct_resolved + "%" : "-");
+  document.getElementById("kpiMedian").textContent      = (stats.median_days != null ? stats.median_days + "d" : "-");
+  document.getElementById("kpiAvg").textContent         = (stats.avg_days    != null ? stats.avg_days    + "d" : "-");
+  document.getElementById("kpiOpen").textContent        = stats.open_count ?? "-";
+}
+
+/* ── Map init (two synced maps for tab switching) ─────────────────── */
+function initMaps() {
+  mapMarkers = L.map("mapMarkers", {
+    zoomControl: true,
+    preferCanvas: true,
+  }).setView([51.5, -0.12], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19,
+  }).addTo(mapMarkers);
+
+  // Plain layer group of individual CircleMarkers — fast even at high counts
+  markerGroup = L.layerGroup();
+  mapMarkers.addLayer(markerGroup);
+
+  mapHeat = L.map("mapHeat", {
+    zoomControl: true,
+    preferCanvas: true,
+  }).setView([51.5, -0.12], 12);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19,
+  }).addTo(mapHeat);
+
+  syncMaps(mapMarkers, mapHeat);
+}
+
+function syncMaps(a, b) {
+  let syncing = false;
+  const handler = (src, dst) => () => {
+    if (syncing) return;
+    syncing = true;
+    dst.setView(src.getCenter(), src.getZoom(), { animate: false });
+    syncing = false;
+  };
+  a.on("move zoom", handler(a, b));
+  b.on("move zoom", handler(b, a));
+}
+
+function computeBoroughBounds() {
+  const pts = allReports
+    .filter(r => r.latitude != null && r.longitude != null)
+    .map(r => [r.latitude, r.longitude]);
+  if (!pts.length) {
+    boroughBounds = null;
+    return;
+  }
+  boroughBounds = L.latLngBounds(pts);
+}
+
+/* ── Bucket / colour rules for individual reports ─────────────────────
+ * Six-way age-coded scheme — matches the all-London dashboard.
+ */
+function statusBucket(report) {
+  const status = (report.status || "").toLowerCase();
+  if (status === "open") {
+    const open = report.days_open != null ? report.days_open : null;
+    if (open == null)    return "open-fresh";
+    if (open < 7)        return "open-fresh";
+    if (open < 30)       return "open-aging";
+    return "open-overdue";
+  }
+  const days = report.resolution_days;
+  if (days == null)      return "grey";
+  if (days < 7)          return "green";
+  if (days < 30)         return "amber";
+  return "red";
+}
+
+const BUCKET_COLOR = {
+  "green":        "#10b981",  // resolved < 7d
+  "amber":        "#f59e0b",  // resolved 7-30d
+  "red":          "#dc2626",  // resolved 30+d
+  "open-fresh":   "#60a5fa",  // open < 7d
+  "open-aging":   "#f97316",  // open 7-30d
+  "open-overdue": "#9333ea",  // open 30+d  → screams off the map
+  "grey":         "#9e9e9e",
+};
+
+function markerColor(report) {
+  return BUCKET_COLOR[statusBucket(report)] || "#9e9e9e";
+}
+
+/* Heat weights — cold = resolved-fast / few; hot = old or still-open */
+const HEAT_WEIGHTS = {
+  "green":        0.05,
+  "amber":        0.2,
+  "red":          0.5,
+  "open-fresh":   0.3,
+  "open-aging":   0.65,
+  "open-overdue": 1.0,
+  "grey":         0.3,
+};
+function heatWeight(report) {
+  return HEAT_WEIGHTS[statusBucket(report)] ?? 0.3;
+}
+
+/* ── Render the map ───────────────────────────────────────────────── */
+function renderMap() {
+  const reports = allReports;
+  markerGroup.clearLayers();
+  const markers = [];
+  const heatPoints = [];
+  reports.forEach(r => {
+    if (r.latitude == null || r.longitude == null) return;
+    const marker = L.circleMarker([r.latitude, r.longitude], {
+      radius: 5,
+      fillColor: markerColor(r),
+      color: "#fff",
+      weight: 1.5,
+      opacity: 1,
+      fillOpacity: 0.8,
+    });
+    marker.on("click", () => openDrawer(r.id));
+    markers.push(marker);
+    markerGroup.addLayer(marker);
+    heatPoints.push([r.latitude, r.longitude, heatWeight(r)]);
+  });
+
+  if (heatLayer) {
+    mapHeat.removeLayer(heatLayer);
+    heatLayer = null;
+  }
+  if (heatPoints.length) {
+    heatLayer = L.heatLayer(heatPoints, {
+      radius: 25,
+      blur: 20,
+      maxZoom: 17,
+      max: 1.0,
+      minOpacity: 0.25,
+      gradient: {
+        0.0: "#2c7bb6",
+        0.2: "#00a6ca",
+        0.35: "#00ccbc",
+        0.5: "#90eb9d",
+        0.65: "#ffff8c",
+        0.78: "#f9d057",
+        0.88: "#f29e2e",
+        0.95: "#e76818",
+        1.0: "#d7191c",
+      },
+    }).addTo(mapHeat);
+  }
+
+  document.getElementById("mapCount").textContent =
+    `${reports.length.toLocaleString()} report${reports.length === 1 ? "" : "s"} shown`;
+}
+
+/* ── Tab switching ────────────────────────────────────────────────── */
+function switchMapView(view) {
+  if (view === currentMapView) return;
+  currentMapView = view;
+
+  const markersTab = document.getElementById("tabMarkers");
+  const heatTab    = document.getElementById("tabHeat");
+  const markersView = document.getElementById("mapMarkersView");
+  const heatView    = document.getElementById("mapHeatView");
+  const legendMarkers = document.getElementById("legendMarkers");
+  const legendHeat    = document.getElementById("legendHeat");
+
+  if (view === "heat") {
+    heatTab.classList.add("active");
+    heatTab.setAttribute("aria-selected", "true");
+    markersTab.classList.remove("active");
+    markersTab.setAttribute("aria-selected", "false");
+
+    heatView.classList.add("active");
+    markersView.classList.remove("active");
+
+    legendMarkers.style.display = "none";
+    legendHeat.style.display = "";
+
+    setTimeout(() => mapHeat.invalidateSize(), 360);
+  } else {
+    markersTab.classList.add("active");
+    markersTab.setAttribute("aria-selected", "true");
+    heatTab.classList.remove("active");
+    heatTab.setAttribute("aria-selected", "false");
+
+    markersView.classList.add("active");
+    heatView.classList.remove("active");
+
+    legendMarkers.style.display = "";
+    legendHeat.style.display = "none";
+
+    setTimeout(() => mapMarkers.invalidateSize(), 360);
+  }
+}
+
+/* ── Reset view ───────────────────────────────────────────────────── */
+function resetMapView() {
+  if (boroughBounds) {
+    mapMarkers.fitBounds(boroughBounds, { padding: [30, 30], animate: true });
+  }
+}
+
+/* ── Side-drawer ticket modal ─────────────────────────────────────── */
+
+let drawerPhotoIndex = 0;
+let drawerPhotos = [];
+
+async function openDrawer(id) {
+  const drawer    = document.getElementById("ticketDrawer");
+  const backdrop  = document.getElementById("drawerBackdrop");
+  const content   = document.getElementById("drawerContent");
+
+  content.innerHTML = `<div class="drawer-loading"><div class="spinner"></div><span>Loading ticket #${id}&hellip;</span></div>`;
+  drawer.classList.add("open");
+  backdrop.classList.add("visible");
+  drawer.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+
+  let ticket = ticketCache[id];
+  if (!ticket) {
+    try {
+      ticket = await fetch(`/api/reports/${id}`).then(r => r.json());
+    } catch (e) {
+      content.innerHTML = `<div class="drawer-error">Could not load ticket #${id}.</div>`;
+      return;
+    }
+    if (ticket.error) {
+      content.innerHTML = `<div class="drawer-error">${esc(ticket.error)}</div>`;
+      return;
+    }
+    ticketCache[id] = ticket;
+  }
+  content.innerHTML = renderDrawerContent(ticket);
+  drawerPhotos = Array.isArray(ticket.photos) ? ticket.photos : [];
+  drawerPhotoIndex = 0;
+  updateCarousel();
+}
+
+function closeDrawer() {
+  const drawer    = document.getElementById("ticketDrawer");
+  const backdrop  = document.getElementById("drawerBackdrop");
+  drawer.classList.remove("open");
+  backdrop.classList.remove("visible");
+  drawer.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeDrawer();
+  if (document.getElementById("ticketDrawer")?.classList.contains("open")) {
+    if (e.key === "ArrowLeft")  carouselPrev();
+    if (e.key === "ArrowRight") carouselNext();
+  }
+});
+
+function carouselPrev() {
+  if (!drawerPhotos.length) return;
+  drawerPhotoIndex = (drawerPhotoIndex - 1 + drawerPhotos.length) % drawerPhotos.length;
+  updateCarousel();
+}
+function carouselNext() {
+  if (!drawerPhotos.length) return;
+  drawerPhotoIndex = (drawerPhotoIndex + 1) % drawerPhotos.length;
+  updateCarousel();
+}
+function carouselGoto(i) {
+  if (!drawerPhotos.length) return;
+  drawerPhotoIndex = i;
+  updateCarousel();
+}
+function updateCarousel() {
+  const img    = document.getElementById("carouselImg");
+  const counter= document.getElementById("carouselCounter");
+  const dotsEl = document.getElementById("carouselDots");
+  if (!img || !drawerPhotos.length) return;
+  img.classList.remove("failed");
+  img.src = drawerPhotos[drawerPhotoIndex];
+  if (counter) counter.textContent = `${drawerPhotoIndex + 1} / ${drawerPhotos.length}`;
+  if (dotsEl) {
+    [...dotsEl.children].forEach((dot, i) => {
+      dot.classList.toggle("active", i === drawerPhotoIndex);
+    });
+  }
+}
+
+function renderDrawerContent(t) {
+  const status = (t.status || "").toLowerCase();
+  let statusBadge;
+  if (status === "fixed") {
+    statusBadge = '<span class="dr-badge dr-badge-green">&#10003; Fixed</span>';
+  } else if (status === "open") {
+    statusBadge = '<span class="dr-badge dr-badge-blue">&#9679; Open</span>';
+  } else {
+    statusBadge = `<span class="dr-badge dr-badge-grey">${esc(t.status || "Unknown")}</span>`;
+  }
+
+  let timingBadge = "";
+  if (status === "fixed" && t.resolution_days != null) {
+    const d = Number(t.resolution_days);
+    const cls = d < 7 ? "dr-badge-green" : (d < 30 ? "dr-badge-amber" : "dr-badge-red");
+    timingBadge = `<span class="dr-badge ${cls}">Resolved in ${d.toFixed(1)} days</span>`;
+  } else if (status === "open" && t.days_open != null) {
+    const od = Number(t.days_open);
+    const cls = od < 7
+      ? "dr-badge-open-fresh"
+      : (od < 30 ? "dr-badge-open-aging" : "dr-badge-open-overdue");
+    timingBadge = `<span class="dr-badge ${cls}">Open for ${od.toFixed(1)} days</span>`;
+  }
+
+  const photos = Array.isArray(t.photos) ? t.photos : [];
+  let carouselBlock = "";
+  if (photos.length) {
+    const showNav = photos.length > 1;
+    const dots = showNav
+      ? `<div class="carousel-dots" id="carouselDots">${
+          photos.map((_, i) =>
+            `<button type="button" class="carousel-dot" onclick="carouselGoto(${i})" aria-label="Photo ${i+1}"></button>`
+          ).join("")
+        }</div>`
+      : "";
+    const nav = showNav
+      ? `<button class="carousel-nav carousel-prev" type="button" onclick="carouselPrev()" aria-label="Previous photo">&#10094;</button>
+         <button class="carousel-nav carousel-next" type="button" onclick="carouselNext()" aria-label="Next photo">&#10095;</button>`
+      : "";
+    const counter = showNav
+      ? `<span class="carousel-counter" id="carouselCounter">1 / ${photos.length}</span>`
+      : "";
+    carouselBlock = `
+      <div class="dr-carousel">
+        <div class="carousel-stage">
+          <div class="carousel-fallback" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21,15 16,10 5,21"/></svg>
+            <span>Photo unavailable</span>
+          </div>
+          <img id="carouselImg" src="${esc(photos[0])}" alt="Reported issue photo" referrerpolicy="no-referrer" onerror="this.classList.add('failed')">
+          ${nav}
+          ${counter}
+        </div>
+        ${dots}
+      </div>`;
+  }
+
+  const updates = Array.isArray(t.updates) ? t.updates : [];
+  let timelineBlock = "";
+  if (updates.length) {
+    const items = updates.map(u => {
+      const ts = u.timestamp ? formatDateTime(u.timestamp) : "";
+      const isFixed = /fixed|resolved|completed/i.test(u.text || "");
+      const cls = isFixed ? "timeline-dot timeline-dot-green" : "timeline-dot";
+      const txt = (u.text || "").replace(/\s+/g, " ").trim();
+      return `
+        <li class="timeline-item">
+          <span class="${cls}" aria-hidden="true"></span>
+          <div class="timeline-body">
+            <div class="timeline-ts">${esc(ts)}</div>
+            <div class="timeline-text">${esc(txt)}</div>
+          </div>
+        </li>`;
+    }).join("");
+    timelineBlock = `
+      <section class="dr-section">
+        <h3 class="dr-section-title">Council Updates <span class="dr-section-count">${updates.length}</span></h3>
+        <ol class="dr-timeline">${items}</ol>
+      </section>`;
+  }
+
+  const desc = (t.description && t.description !== ".")
+    ? `<section class="dr-section">
+         <h3 class="dr-section-title">Description</h3>
+         <p class="dr-desc">${esc(t.description)}</p>
+       </section>`
+    : "";
+
+  const reported = t.created_at ? formatDate(t.created_at) : "—";
+  const resolved = t.resolved_at ? formatDate(t.resolved_at) : null;
+
+  return `
+    <header class="dr-header">
+      <div class="dr-eyebrow">
+        <span class="dr-eyebrow-cat">${esc(t.category || "Uncategorised")}</span>
+        <span class="dr-eyebrow-ref">#${esc(t.id)}</span>
+      </div>
+      <h2 class="dr-title" id="drawerTitle">${esc(t.title || "Untitled report")}</h2>
+      <div class="dr-badges">${statusBadge}${timingBadge}</div>
+    </header>
+
+    ${carouselBlock}
+
+    <section class="dr-section dr-meta">
+      <div class="dr-meta-row"><span class="dr-meta-k">Borough</span><span class="dr-meta-v">${esc(t.borough || "—")}</span></div>
+      ${t.council ? `<div class="dr-meta-row"><span class="dr-meta-k">Council</span><span class="dr-meta-v">${esc(t.council)}</span></div>` : ""}
+      <div class="dr-meta-row"><span class="dr-meta-k">Address</span><span class="dr-meta-v">${esc(t.address || "—")}</span></div>
+      <div class="dr-meta-row"><span class="dr-meta-k">Reported</span><span class="dr-meta-v">${reported}</span></div>
+      ${resolved ? `<div class="dr-meta-row"><span class="dr-meta-k">Resolved</span><span class="dr-meta-v">${resolved}</span></div>` : ""}
+    </section>
+
+    ${desc}
+    ${timelineBlock}
+
+    <footer class="dr-footer">
+      <a class="dr-action dr-action-primary" href="${esc(t.fixmystreet_url)}" target="_blank" rel="noopener">
+        Open on FixMyStreet &rarr;
+      </a>
+    </footer>
+  `;
+}
+
+function formatDateTime(iso) {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  } catch (e) { return iso; }
+}
+
+/* ── Category chart ────────────────────────────────────────────────── */
+function renderCategoryChart() {
+  const data = stats.category_stats || [];
+  const labels = data.map(c => c.category || "—");
+  const counts = data.map(c => c.total);
+  if (categoryChart) categoryChart.destroy();
+  categoryChart = new Chart(document.getElementById("categoryChart"), {
+    type: "bar",
+    data: { labels, datasets: [{ label: "Reports", data: counts, backgroundColor: "#283593", borderRadius: 3 }] },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { precision: 0 } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      },
+    },
+  });
+}
+
+/* ── Resolution chart ──────────────────────────────────────────────── */
+const RESOLUTION_ORDER = ["Same day", "1-3 days", "3-7 days", "1-4 weeks", "1-3 months", "3-6 months", "6+ months"];
+function renderResolutionChart() {
+  const dist = stats.resolution_distribution || {};
+  const labels = RESOLUTION_ORDER.filter(k => k in dist);
+  const data = labels.map(k => dist[k]);
+  const colors = ["#2e7d32","#43a047","#66bb6a","#f57f17","#ef6c00","#c62828","#b71c1c"];
+  if (resolutionChart) resolutionChart.destroy();
+  resolutionChart = new Chart(document.getElementById("resolutionChart"), {
+    type: "bar",
+    data: { labels, datasets: [{ label: "Reports", data, backgroundColor: colors, borderRadius: 3 }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: "#eee" }, ticks: { precision: 0 } },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+}
+
+/* ── Lists ─────────────────────────────────────────────────────────── */
+function renderAttentionList() {
+  const el = document.getElementById("attentionList");
+  // Belt-and-braces sort by days_open desc — the API already returns
+  // oldest-first, but if that changes upstream we still want the worst
+  // (purple) rows pinned to the top.
+  const items = [...(stats.slowest_open || [])].sort((a, b) => {
+    const ad = a.days_open ?? -1;
+    const bd = b.days_open ?? -1;
+    return bd - ad;
+  });
+  if (!items.length) {
+    el.innerHTML = "<li class='loading' style='padding:1rem'>No open reports &mdash; backlog is clear.</li>";
+    return;
+  }
+  el.innerHTML = items.map(t => {
+    let cls = "popup-badge-open-fresh";
+    let liCls = "";
+    if (t.days_open != null) {
+      if (t.days_open >= 30) {
+        cls = "popup-badge-open-overdue";
+        liCls = "attention-overdue";   // purple highlight stripe
+      } else if (t.days_open >= 7) {
+        cls = "popup-badge-open-aging";
+      }
+    }
+    return `
+    <li${liCls ? ` class="${liCls}"` : ""}>
+      <div class="row1">
+        <a class="ticket-title" href="${esc(t.fixmystreet_url)}" target="_blank" rel="noopener">${esc(t.title || "Untitled")}</a>
+        <span class="popup-badge ${cls}">${t.days_open != null ? t.days_open.toFixed(0) + " days open" : "Open"}</span>
+      </div>
+      <div class="ticket-meta">${esc(t.category || "")} &middot; ${esc(t.address || "")}</div>
+    </li>`;
+  }).join("");
+}
+
+function renderWinsList() {
+  const el = document.getElementById("winsList");
+  const items = stats.fastest_resolved || [];
+  if (!items.length) {
+    el.innerHTML = "<li class='loading' style='padding:1rem'>No resolved reports yet.</li>";
+    return;
+  }
+  el.innerHTML = items.map(t => `
+    <li>
+      <div class="row1">
+        <a class="ticket-title" href="${esc(t.fixmystreet_url)}" target="_blank" rel="noopener">${esc(t.title || "Untitled")}</a>
+        <span class="popup-badge popup-badge-green">${t.resolution_days != null ? Number(t.resolution_days).toFixed(1) + "d" : "Fixed"}</span>
+      </div>
+      <div class="ticket-meta">${esc(t.category || "")} &middot; ${esc(t.address || "")}</div>
+    </li>
+  `).join("");
+}
+
+/* ── Util ─────────────────────────────────────────────────────────── */
+function esc(s) {
+  if (s === null || s === undefined) return "";
+  const d = document.createElement("div");
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
+function formatDate(iso) {
+  try {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  } catch (e) { return iso; }
+}
+</script>
+</body>
+</html>

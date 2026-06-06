@@ -1,0 +1,54 @@
+# docker-compose.yml — London Civic Agent + Ollama
+#
+# Usage:
+#   docker compose up -d          # start both services
+#   docker compose logs -f app    # follow app logs
+#   docker compose down           # stop everything
+#
+# First run: Ollama needs to pull the model after starting:
+#   docker compose exec ollama ollama pull llama3.3:70b-instruct-q4_K_M
+
+services:
+  app:
+    build: .
+    container_name: london-civic-app
+    ports:
+      - "5050:5050"
+      - "8000:8000"
+    environment:
+      - MODEL_PROVIDER=openai
+      - OPENAI_BASE_URL=http://ollama:11434/v1
+      - OPENAI_API_KEY=ollama
+      - OPENAI_MODEL=llama3.3:70b-instruct-q4_K_M
+    volumes:
+      - ./data:/app/data
+      - ./scraper/fixmystreet.db:/app/scraper/fixmystreet.db
+    depends_on:
+      - ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: london-civic-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  ollama_data:

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>Speak up · Sorted</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+
+<main class="app">
+
+  <header class="app-bar">
+    <a class="back" href="/app" aria-label="Back to home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+    </a>
+    <h1 class="title">Speak up</h1>
+    <span class="spacer"></span>
+  </header>
+
+  <section class="page">
+
+    <!-- Intake view -->
+    <div id="intakeView">
+      <h2 class="page-heading">Tell us what you saw.</h2>
+      <p class="page-sub">Speak naturally. We'll transcribe and route it.</p>
+
+      <div class="mic-stage">
+        <div class="mic-wrap">
+          <button type="button" class="mic-btn" id="micBtn" aria-label="Start recording">
+            <span class="mic-pulse" aria-hidden="true"></span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="3" width="6" height="11" rx="3"/>
+              <path d="M5 11a7 7 0 0014 0M12 18v3M9 21h6"/>
+            </svg>
+          </button>
+        </div>
+
+        <div style="text-align:center;">
+          <div class="mic-status" id="micStatus">Tap to record</div>
+          <div class="mic-meta" id="micMeta">Speak naturally &mdash; we'll transcribe.</div>
+        </div>
+      </div>
+
+      <div class="transcript empty" id="transcript">Your transcript will appear here.</div>
+
+      <div id="notice" class="notice-error" role="alert"></div>
+
+      <div class="actions-row" style="margin-top:24px;">
+        <button type="button" class="primary-btn" id="submitBtn" disabled>Submit report</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loadingView">
+      <div class="loading-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="loading-text">Analysing your report &middot; routing to the right council</p>
+    </div>
+
+    <!-- Result -->
+    <div class="result" id="resultView" aria-live="polite"></div>
+
+  </section>
+
+</main>
+
+<footer class="app-foot">
+  <span>Powered by AI</span>
+  <span class="dot">&middot;</span>
+  <span>Your data stays local</span>
+  <span class="dot">&middot;</span>
+  <a href="/">View admin dashboard &rarr;</a>
+</footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

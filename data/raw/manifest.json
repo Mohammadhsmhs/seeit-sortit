@@ -1,0 +1,130 @@
+{
+  "description": "London Civic Agent RAG corpus - raw public datasets",
+  "download_date": "2026-06-02",
+  "datasets": [
+    {
+      "name": "STATS19 Road Collisions 2024",
+      "file": "stats19/collisions_2024.csv",
+      "source_url": "https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-collision-2024.csv",
+      "source_page": "https://www.gov.uk/government/statistical-data-sets/road-safety-open-data",
+      "format": "CSV",
+      "encoding": "utf-8",
+      "row_count": 100927,
+      "file_size_bytes": 19593617,
+      "description": "All reported road collisions in Great Britain for 2024. Contains collision location (lat/lon, easting/northing), severity, date, road type, local authority. Filter police_force or local_authority for London.",
+      "key_columns": ["longitude", "latitude", "collision_severity", "date", "local_authority_district", "road_type", "speed_limit"],
+      "london_filter": "police_force == 1 (Metropolitan Police) or local_authority codes starting with E09"
+    },
+    {
+      "name": "STATS19 Road Casualties 2024",
+      "file": "stats19/casualties_2024.csv",
+      "source_url": "https://data.dft.gov.uk/road-accidents-safety-data/dft-road-casualty-statistics-casualty-2024.csv",
+      "source_page": "https://www.gov.uk/government/statistical-data-sets/road-safety-open-data",
+      "format": "CSV",
+      "encoding": "utf-8",
+      "row_count": 128272,
+      "file_size_bytes": 10227306,
+      "description": "Casualty-level records for all reported road collisions in Great Britain 2024. Links to collisions via collision_index. Contains casualty severity, age, sex, type.",
+      "key_columns": ["collision_index", "casualty_severity", "casualty_class", "sex_of_casualty", "age_of_casualty", "casualty_type"],
+      "london_filter": "Join to collisions_2024 on collision_index, then filter by London police force/LA"
+    },
+    {
+      "name": "Schools (GIAS) - London Only",
+      "file": "schools/london_schools.csv",
+      "source_url": "https://ea-edubase-api-prod.azurewebsites.net/edubase/downloads/public/edubasealldata20260601.csv",
+      "source_page": "https://get-information-schools.service.gov.uk/Downloads",
+      "format": "CSV",
+      "encoding": "utf-8",
+      "row_count": 5881,
+      "file_size_bytes": 5577042,
+      "description": "All schools in London from the Get Information About Schools (GIAS) register. Pre-filtered from national dataset where GOR (name) contains 'London'. Includes open and closed schools.",
+      "key_columns": ["EstablishmentName", "Postcode", "Easting", "Northing", "TypeOfEstablishment (name)", "PhaseOfEducation (name)", "EstablishmentStatus (name)", "LA (name)"],
+      "london_filter": "Already filtered to London (GOR region)"
+    },
+    {
+      "name": "NHS Trust Sites (Hospitals)",
+      "file": "hospitals/nhs_trusts_sites.csv",
+      "source_url": "https://www.odsdatasearchandexport.nhs.uk/api/getReport?report=ets",
+      "source_page": "https://digital.nhs.uk/services/organisation-data-service/data-search-and-export/csv-downloads/other-nhs-organisations",
+      "format": "CSV",
+      "encoding": "utf-8",
+      "row_count": 45671,
+      "file_size_bytes": 7934972,
+      "has_header": false,
+      "description": "All NHS trust sites in England from the Organisation Data Service. No header row. Contains site codes, names, addresses, postcodes. Filter by postcode prefix for London.",
+      "key_columns": ["col0: ODS code", "col1: site name", "col4: address1", "col9: postcode", "col10: open_date"],
+      "london_filter": "Filter by London postcode prefixes (E, EC, N, NW, SE, SW, W, WC) or by matching against London borough postcodes"
+    },
+    {
+      "name": "CQC Care Directory",
+      "file": "care_homes/cqc_directory.csv",
+      "source_url": "https://www.cqc.org.uk/sites/default/files/2026-05/27_May_2026_CQC_directory.csv",
+      "source_page": "https://www.cqc.org.uk/about-us/transparency/using-cqc-data",
+      "format": "CSV",
+      "encoding": "utf-8",
+      "row_count": 56778,
+      "file_size_bytes": 18845223,
+      "header_skip_rows": 4,
+      "description": "Complete CQC care directory for England. First 4 rows are metadata, data starts at row 5. Contains care homes, dental practices, hospitals, homecare agencies etc. Filter Region column for London.",
+      "key_columns": ["Name", "Address", "Postcode", "Service types", "Provider name", "Local authority", "Region", "CQC Location ID"],
+      "london_filter": "Region == 'London'"
+    },
+    {
+      "name": "Census 2021 LSOA Population Density - London",
+      "file": "census/london_lsoa_population_density.csv",
+      "source_url": "https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareapopulationdensity/mid2022revisednov2025tomid2024/sapelsoapopulationdensity20222024.xlsx",
+      "source_page": "https://www.ons.gov.uk/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareapopulationdensity",
+      "format": "CSV (converted from XLSX)",
+      "encoding": "utf-8",
+      "row_count": 4994,
+      "file_size_bytes": 593867,
+      "description": "Population density by LSOA for London boroughs (LAD codes starting with E09). Extracted from ONS mid-2022 to mid-2024 LSOA population density spreadsheet. Contains population counts and people per sq km.",
+      "key_columns": ["LAD 2023 Code", "LAD 2023 Name", "LSOA 2021 Code", "LSOA 2021 Name", "Area Sq Km", "Mid-2024: Population", "Mid-2024: People per Sq Km"],
+      "london_filter": "Already filtered to London (LAD codes E09*)"
+    },
+    {
+      "dataset": "traffic",
+      "name": "DfT AADF Road Traffic Statistics - London 2025",
+      "source_name": "DfT AADF Road Traffic Statistics",
+      "file": "traffic/london_aadf_2025.csv",
+      "source_url": "https://storage.googleapis.com/dft-statistics/road-traffic/downloads/aadf/region_id/dft_aadf_region_id_6.csv",
+      "source_page": "https://roadtraffic.dft.gov.uk/downloads",
+      "downloaded_date": "2026-06-02",
+      "format": "CSV",
+      "encoding": "utf-8",
+      "license": "Open Government Licence v3.0",
+      "row_count": 2050,
+      "london_row_count": 2050,
+      "file_size_bytes": 425984,
+      "description": "Annual Average Daily Flow (AADF) traffic counts at fixed count point locations across all 33 London boroughs for 2025. Each row is one count point and reports estimated vehicles per average day, broken down by vehicle type (pedal cycles, motorcycles, cars, buses, LGVs, HGVs by axle configuration). Filtered from the full London 2000-2025 time series (56,321 rows) down to the most recent year.",
+      "columns": ["count_point_id", "year", "region_id", "region_name", "local_authority_id", "local_authority_name", "road_name", "road_type", "start_junction_road_name", "end_junction_road_name", "easting", "northing", "latitude", "longitude", "link_length_km", "link_length_miles", "estimation_method", "estimation_method_detailed", "pedal_cycles", "two_wheeled_motor_vehicles", "cars_and_taxis", "buses_and_coaches", "lgvs", "hgvs_2_rigid_axle", "hgvs_3_rigid_axle", "hgvs_4_or_more_rigid_axle", "hgvs_3_or_4_articulated_axle", "hgvs_5_articulated_axle", "hgvs_6_articulated_axle", "all_hgvs", "all_motor_vehicles"],
+      "key_columns": ["count_point_id", "road_name", "road_type", "latitude", "longitude", "local_authority_name", "all_motor_vehicles", "all_hgvs", "cars_and_taxis", "buses_and_coaches", "pedal_cycles", "two_wheeled_motor_vehicles"],
+      "london_filter": "region_id == 6 (already filtered at source)",
+      "boroughs_covered": 33,
+      "max_aadf_observed": 212636
+    }
+  ],
+  "supplementary_files": [
+    {
+      "name": "Census 2021 LSOA Age Bands (London Datastore)",
+      "file": "census/lsoa_age_bands.xlsx",
+      "source_url": "https://data.london.gov.uk/download/2021-census-lsoa-demography-and-migration/2efcb2e1-6aa7-42bd-97e2-1d5e0466f6c6/Five%20year%20age%20bands.xlsx",
+      "file_size_bytes": 1724602,
+      "description": "Census 2021 population by five-year age bands at LSOA level for London"
+    },
+    {
+      "name": "Census 2021 Usual Residents by Ward (London Datastore)",
+      "file": "census/usual_residents_ward.xlsx",
+      "source_url": "https://data.london.gov.uk/download/2021-census-wards-demography-and-migration/b4fca9c8-30fa-4e66-858c-cbeb623fda9c/Usual%20Residents.xlsx",
+      "file_size_bytes": 182244,
+      "description": "Census 2021 usual residents by ward for London boroughs"
+    },
+    {
+      "name": "ONS LSOA Population Density (Full England & Wales)",
+      "file": "census/lsoa_population_density.xlsx",
+      "source_url": "https://www.ons.gov.uk/file?uri=/peoplepopulationandcommunity/populationandmigration/populationestimates/datasets/lowersuperoutputareapopulationdensity/mid2022revisednov2025tomid2024/sapelsoapopulationdensity20222024.xlsx",
+      "file_size_bytes": 3774920,
+      "description": "Full England & Wales LSOA population density source file (London subset extracted to london_lsoa_population_density.csv)"
+    }
+  ]
+}

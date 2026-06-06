@@ -1,0 +1,22 @@
+Generate a short, descriptive title (under 10 words) for this civic issue report. The title should summarise the problem and location if mentioned.
+
+Category: {category}
+
+Report: {description}
+
+Respond with ONLY the title text. No quotes, no explanation, no prefix.
+
+Examples:
+
+Report: "Deep pothole on Baker Street near the tube station causing traffic issues."
+Title: Deep pothole on Baker Street
+
+Report: "Three streetlights out on Lambeth Palace Road near hospital."
+Title: Streetlights out on Lambeth Palace Road
+
+Report: "Fly-tipping of old furniture and bin bags blocking the pavement on Vallance Road."
+Title: Fly-tipping blocking pavement on Vallance Road
+
+Now generate a title for the report above.
+
+Title:

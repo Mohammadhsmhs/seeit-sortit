@@ -1,0 +1,86 @@
+# ───────────────────────────────────────────────────────────────────────
+# Sorted — repo .gitignore
+# ───────────────────────────────────────────────────────────────────────
+
+# OS / editor cruft
+.DS_Store
+*.swp
+*~
+
+# ── Python ────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# ── Node / JavaScript ─────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+.yarn/cache
+
+# ── Expo / React Native ───────────────────────────────────────────────
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
+mobile/web-build/
+
+# ── iOS native build artefacts ────────────────────────────────────────
+mobile/ios/Pods/
+mobile/ios/build/
+mobile/ios/Podfile.lock
+mobile/ios/.xcode.env.local
+mobile/ios/*.xcworkspace/xcuserdata/
+mobile/ios/*.xcodeproj/xcuserdata/
+mobile/ios/DerivedData/
+
+# ── Android native build artefacts (if/when we add Android) ───────────
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/.gradle/
+mobile/android/local.properties
+
+# ── Scraped corpora — large, regenerable, license-sensitive ───────────
+# Keep manifest.json + metadata. Skip the actual heavy files.
+data/raw/stats19/*.csv
+data/raw/care_homes/*.csv
+data/raw/hospitals/*.csv
+data/raw/schools/*.csv
+data/raw/census/*.csv
+data/raw/census/*.xlsx
+data/raw/traffic/*.csv
+data/raw/boundaries/
+data/rag_index.json
+data/processed_issues.json
+data/fixmystreet_reports.csv
+data/export/fixmystreet_reports.csv
+# NOTE: data/photos/ (Mohammad's, on remote) and data/export/photos/ (categorized)
+# stay tracked — both render in the dashboard. Pictures/ at repo root also tracked.
+
+# Scraper-local artefacts (working copies — regeneratable from scrape.py)
+scraper/fixmystreet.db
+scraper/logs/
+scraper/__pycache__/
+scraper/photos/
+
+# ── Local tool state ──────────────────────────────────────────────────
+.claude/
+.gstack/
+
+# ── Secrets ───────────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.json
+credentials.json

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issues by Category &mdash; Sorted</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────── -->
+<header class="header">
+  <span class="header-logo">S.</span>
+  <h1>Sorted &mdash; Borough Performance Dashboard</h1>
+  <span class="header-right" id="reportCount"></span>
+</header>
+
+<!-- ── Nav bar ─────────────────────────────────────────────────────── -->
+<nav style="background:#fff;border-bottom:1px solid var(--grey-200);padding:0 2rem;display:flex;gap:0;align-items:center;">
+  <a href="/" style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--grey-600);text-decoration:none;border-bottom:3px solid transparent;">Dashboard</a>
+  <a href="/dashboard/categories" style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--navy);text-decoration:none;border-bottom:3px solid var(--navy);">Categories</a>
+  <a href="/processed" style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--grey-600);text-decoration:none;border-bottom:3px solid transparent;">Processed Issues</a>
+  <a href="/intake" style="display:inline-block;padding:.7rem 1.25rem;font-size:.88rem;font-weight:600;color:var(--grey-600);text-decoration:none;border-bottom:3px solid transparent;">Submit Issue</a>
+  <a href="/app" style="margin-left:auto;padding:.45rem .9rem;font-size:.82rem;font-weight:500;color:var(--grey-600);text-decoration:none;border:1px solid var(--grey-200);border-radius:6px;">Open consumer app &rarr;</a>
+</nav>
+
+<!-- ── Hero ────────────────────────────────────────────────────────── -->
+<section class="category-hero">
+  <a class="back-link" href="/dashboard">&larr; All London</a>
+  <div class="category-tag">Categories</div>
+  <h2>Issues by Category</h2>
+  <div class="category-sub" id="categorySub">Performance broken down by issue type across all London boroughs</div>
+</section>
+
+<!-- ── KPI strip ───────────────────────────────────────────────────── -->
+<div class="kpi-strip">
+  <div class="kpi-card"><div class="value" id="kpiCategories">-</div><div class="label">Parent Categories</div></div>
+  <div class="kpi-card"><div class="value" id="kpiTotal">-</div><div class="label">Total Reports</div></div>
+  <div class="kpi-card"><div class="value" id="kpiResolved">-</div><div class="label">% Resolved</div></div>
+  <div class="kpi-card"><div class="value" id="kpiMedian">-</div><div class="label">Median Resolution</div></div>
+  <div class="kpi-card"><div class="value" id="kpiSlowest">-</div><div class="label">Slowest Category</div></div>
+</div>
+
+<!-- ── Main grid ───────────────────────────────────────────────────── -->
+<div class="main">
+
+  <!-- Volume by category -->
+  <div class="panel">
+    <div class="panel-header">Report Volume per Category (top 15)</div>
+    <div class="panel-body"><div class="chart-container-tall"><canvas id="volumeChart"></canvas></div></div>
+  </div>
+
+  <!-- Median resolution by category -->
+  <div class="panel">
+    <div class="panel-header">
+      Median Resolution Time per Category
+      <span class="panel-header-hint">Sorted slowest &rarr; fastest</span>
+    </div>
+    <div class="panel-body"><div class="chart-container-tall"><canvas id="medianChart"></canvas></div></div>
+  </div>
+
+  <!-- Category leaderboard table -->
+  <div class="panel full-width">
+    <div class="panel-header">
+      Category Leaderboard
+      <span class="panel-header-hint">Click any row to drill into a category &middot; click any column to sort</span>
+    </div>
+    <div class="panel-body">
+      <div class="cat-table-wrap">
+        <table class="leaderboard-scorecard cat-table" id="catTable">
+          <thead><tr id="catTableHead"></tr></thead>
+          <tbody id="catTableBody">
+            <tr><td colspan="9" class="loading"><div class="spinner"></div><br>Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ── State ─────────────────────────────────────────────────────────── */
+let categoryStats = [];
+let volumeChart = null;
+let medianChart = null;
+
+/* Click-to-sort state */
+let catSortKey = "total";
+let catSortDir = "desc";
+
+/* ── Init ──────────────────────────────────────────────────────────── */
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const stats = await fetch("/api/categories/stats").then(r => r.json());
+    categoryStats = Array.isArray(stats) ? stats : [];
+  } catch (e) {
+    document.getElementById("categorySub").textContent = "Could not load category data.";
+    return;
+  }
+  if (!categoryStats.length) {
+    document.getElementById("catTableHead").innerHTML = "";
+    document.getElementById("catTableBody").innerHTML =
+      "<tr><td colspan='9' class='loading'>No category data available.</td></tr>";
+    return;
+  }
+  renderKPIs();
+  renderVolumeChart();
+  renderMedianChart();
+  renderTable();
+});
+
+/* ── KPIs ──────────────────────────────────────────────────────────── */
+function renderKPIs() {
+  document.getElementById("kpiCategories").textContent = categoryStats.length;
+  const total = categoryStats.reduce((s, c) => s + (c.total || 0), 0);
+  document.getElementById("kpiTotal").textContent = total.toLocaleString();
+  document.getElementById("reportCount").textContent = total.toLocaleString() + " reports loaded";
+
+  // Aggregate % resolved across all categories
+  const resolved = categoryStats.reduce((s, c) => s + (c.resolved || 0), 0);
+  const pct = total ? (resolved / total) * 100 : 0;
+  document.getElementById("kpiResolved").textContent = pct.toFixed(1) + "%";
+
+  // Pooled median of medians, weighted by total — quick London-wide signal
+  const weighted = categoryStats
+    .filter(c => c.median_resolution_days != null)
+    .reduce((acc, c) => {
+      acc.s += c.median_resolution_days * c.total;
+      acc.n += c.total;
+      return acc;
+    }, { s: 0, n: 0 });
+  document.getElementById("kpiMedian").textContent =
+    weighted.n ? (weighted.s / weighted.n).toFixed(1) + "d" : "-";
+
+  // Slowest = highest median among categories with enough data
+  const slowest = [...categoryStats]
+    .filter(c => c.median_resolution_days != null)
+    .sort((a, b) => b.median_resolution_days - a.median_resolution_days)[0];
+  document.getElementById("kpiSlowest").textContent = slowest ? slowest.category : "-";
+}
+
+/* ── Volume chart (top 15 categories by total) ────────────────────── */
+function renderVolumeChart() {
+  const top = [...categoryStats].sort((a, b) => b.total - a.total).slice(0, 15);
+  const labels = top.map(c => c.category);
+  const data   = top.map(c => c.total);
+  if (volumeChart) volumeChart.destroy();
+  volumeChart = new Chart(document.getElementById("volumeChart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{ label: "Reports", data, backgroundColor: "#283593", borderRadius: 3 }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { precision: 0 } },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      },
+    },
+  });
+}
+
+/* ── Median resolution chart (slowest at top) ─────────────────────── */
+function renderMedianChart() {
+  // Sort by median desc so the slowest sit at the top of a horizontal bar
+  const sorted = [...categoryStats].sort((a, b) => {
+    const av = a.median_resolution_days;
+    const bv = b.median_resolution_days;
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return bv - av;
+  });
+  const labels = sorted.map(c => c.category);
+  const data   = sorted.map(c => c.median_resolution_days ?? 0);
+  const colors = sorted.map(c => {
+    const v = c.median_resolution_days;
+    if (v == null)  return "#bdbdbd";
+    if (v < 7)      return "#10b981";   // green
+    if (v < 30)     return "#f59e0b";   // amber
+    return "#dc2626";                    // dark red (matches map-red)
+  });
+  if (medianChart) medianChart.destroy();
+  medianChart = new Chart(document.getElementById("medianChart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Median resolution (days)",
+        data,
+        backgroundColor: colors,
+        borderRadius: 3,
+      }],
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const v = sorted[ctx.dataIndex].median_resolution_days;
+              return v == null
+                ? `${ctx.label}: no resolved data`
+                : `${ctx.label}: ${v.toFixed(1)} days`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { precision: 0, callback: v => v + "d" },
+          title: { display: true, text: "Days", color: "#757575", font: { size: 11 } },
+        },
+        y: { grid: { display: false }, ticks: { font: { size: 11 } } },
+      },
+    },
+  });
+}
+
+/* ── Category table (clickable, sortable) ─────────────────────────── */
+const CAT_COLUMNS = [
+  { key: "category",                 label: "Category",            type: "str", align: "left"  },
+  { key: "total",                    label: "Total Reports",       type: "num", align: "right" },
+  { key: "pct_resolved",             label: "% Resolved",          type: "num", align: "right", fmt: v => v == null ? "-" : v.toFixed(1) + "%" },
+  { key: "median_resolution_days",   label: "Median Resolution",   type: "num", align: "right", fmt: fmtDays },
+  { key: "avg_days_open",            label: "Avg Open Backlog",    type: "num", align: "right", fmt: fmtDays },
+  { key: "best_borough",             label: "Fastest Borough",     type: "obj", align: "left",  fmt: fmtBoroughBest  },
+  { key: "worst_borough",            label: "Slowest Borough",     type: "obj", align: "left",  fmt: fmtBoroughWorst },
+];
+
+function fmtDays(v) {
+  if (v == null) return "-";
+  return Number(v).toFixed(1) + "d";
+}
+function fmtBoroughBest(v) {
+  if (!v) return '<span class="cat-borough-empty">&mdash;</span>';
+  return `<span class="cat-borough cat-borough-best"><strong>${esc(v.borough)}</strong> <span class="cat-borough-num">${fmtDays(v.median_days)}</span></span>`;
+}
+function fmtBoroughWorst(v) {
+  if (!v) return '<span class="cat-borough-empty">&mdash;</span>';
+  return `<span class="cat-borough cat-borough-worst"><strong>${esc(v.borough)}</strong> <span class="cat-borough-num">${fmtDays(v.median_days)}</span></span>`;
+}
+
+function renderTable() {
+  const head = document.getElementById("catTableHead");
+  head.innerHTML = CAT_COLUMNS.map(col => {
+    const active = col.key === catSortKey;
+    const arrow = active ? (catSortDir === "asc" ? " ▲" : " ▼") : "";
+    const cls = `sortable${active ? " active" : ""}${col.align === "right" ? " num" : ""}`;
+    return `<th class="${cls}" data-col="${col.key}">${esc(col.label)}${arrow}</th>`;
+  }).join("");
+  head.querySelectorAll("th").forEach(th => {
+    th.addEventListener("click", () => {
+      const k = th.dataset.col;
+      if (k === catSortKey) {
+        catSortDir = catSortDir === "asc" ? "desc" : "asc";
+      } else {
+        catSortKey = k;
+        const col = CAT_COLUMNS.find(c => c.key === k);
+        catSortDir = (col && col.type === "str") ? "asc" : "desc";
+      }
+      renderTable();
+    });
+  });
+
+  const data = [...categoryStats];
+  const col = CAT_COLUMNS.find(c => c.key === catSortKey);
+  const dir = catSortDir === "asc" ? 1 : -1;
+  data.sort((a, b) => {
+    let va = a[catSortKey];
+    let vb = b[catSortKey];
+    if (col && col.type === "obj") {
+      va = va ? va.median_days : null;
+      vb = vb ? vb.median_days : null;
+    }
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    if (typeof va === "string") return va.localeCompare(vb) * dir;
+    return (va - vb) * dir;
+  });
+
+  const body = document.getElementById("catTableBody");
+  body.innerHTML = data.map(row => {
+    const cells = CAT_COLUMNS.map(c => {
+      let v = row[c.key];
+      const display = c.fmt ? c.fmt(v) : (v == null ? "-" : v);
+      const cls = c.align === "right" ? "num" : "";
+      if (c.key === "category") {
+        return `<td class="${cls} cat-name-cell"><strong>${esc(v)}</strong></td>`;
+      }
+      return `<td class="${cls}">${display}</td>`;
+    }).join("");
+    return `<tr class="cat-row" data-slug="${esc(row.slug)}">${cells}</tr>`;
+  }).join("");
+
+  body.querySelectorAll(".cat-row").forEach(tr => {
+    tr.addEventListener("click", () => {
+      const slug = tr.dataset.slug;
+      if (slug) window.location.href = `/dashboard/category/${slug}`;
+    });
+  });
+}
+
+/* ── Util ──────────────────────────────────────────────────────────── */
+function esc(s) {
+  if (s === null || s === undefined) return "";
+  const d = document.createElement("div");
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
