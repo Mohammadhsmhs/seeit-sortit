@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { findBoroughForLocation, getDepartmentForCategory, BoroughHit, SortedCategory } from './src/lib/geolocate';
 import {
-  submitPhotoForClassification, mapIssueType, severityToBadge,
+  submitPhotoForClassification, mapIssueType, severityToBadge, bandTone,
   VLMReport, VLM_BASE_URL,
 } from './src/lib/api';
 import { ReactNode, useEffect, useRef, useState } from 'react';
@@ -557,13 +557,27 @@ function CameraScreen({
         <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: p.border,
                        alignSelf: 'center', marginBottom: 18 }} />
         {(() => {
-          // Resolve display fields — prefer real VLM; fall back to a mock pothole when offline.
-          const vlmA = vlm?.details.vlm_analysis;
+          // Prefer real VLM; fall back to a mock pothole when offline.
+          const vlmA = vlm?.analysis;
           const cat = vlmA ? mapIssueType(vlmA.issue_type) : { icon: 'pothole' as SortedCategory, label: 'Pothole' };
           const sev = severityToBadge(vlmA?.severity ?? 4);
           const sevColor = sev.tone === 'high' ? p.red : sev.tone === 'medium' ? p.amber : p.green;
           const isLive = !!vlmA;
+          // Backend borough beats GPS when available (it's enriched with the
+          // VLM's location hint + density lookup).
+          const backendBorough = vlm?.enrichment?.borough;
           const dept = hit ? getDepartmentForCategory(hit.borough, cat.icon) : 'Highways';
+          const boroughLabel = backendBorough ?? hit?.borough.short_name;
+          const locationLine = vlmA
+            ? `${boroughLabel ?? vlmA.location} · ${Math.round((vlmA.confidence ?? 0) * 100)}% confident`
+            : hit
+              ? `${hit.borough.short_name} · ${hit.source === 'polygon' ? 'GPS confirmed' : `~${hit.distance_km.toFixed(1)} km from centroid`}`
+              : 'Location not available · using fallback';
+          // Priority band styling
+          const band = vlm?.priority_band;
+          const bandT = band ? bandTone(band) : null;
+          const bandBg = bandT === 'high' ? '#FDE7E7' : bandT === 'medium' ? p.amberSoft : p.greenChipBg;
+          const bandFg = bandT === 'high' ? p.red : bandT === 'medium' ? p.amber : p.green;
           return (
             <>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
@@ -575,11 +589,7 @@ function CameraScreen({
                   <Text style={{ color: p.ink, fontSize: 19, fontWeight: '800' }}>
                     {cat.label} <Text style={{ color: sevColor }}>· {sev.label}</Text>
                   </Text>
-                  <Text style={{ color: p.inkDim, fontSize: 13, marginTop: 2 }}>
-                    {hit
-                      ? `${hit.borough.short_name} · ${hit.source === 'polygon' ? 'GPS confirmed' : `~${hit.distance_km.toFixed(1)} km from centroid`}`
-                      : 'Location not available · using fallback'}
-                  </Text>
+                  <Text style={{ color: p.inkDim, fontSize: 13, marginTop: 2 }}>{locationLine}</Text>
                 </View>
                 {/* Tiny source indicator */}
                 <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999,
@@ -598,10 +608,10 @@ function CameraScreen({
               <View style={{ marginTop: 16, padding: 14, backgroundColor: p.cardDim, borderRadius: 10,
                              borderLeftWidth: 3, borderLeftColor: p.green }}>
                 <Text style={{ color: p.ink, fontSize: 14, lineHeight: 20 }}>
-                  {hit ? (
+                  {hit || backendBorough ? (
                     <>
                       Send to <Text style={{ fontWeight: '800' }}>
-                        {hit.borough.short_name} — {dept}
+                        {boroughLabel} — {dept}
                       </Text>. We'll track it and tell you when it's fixed.
                     </>
                   ) : (
@@ -611,11 +621,19 @@ function CameraScreen({
                     </>
                   )}
                 </Text>
-                {vlm?.priority_score != null && (
-                  <Text style={{ color: p.inkFaint, fontSize: 11, fontWeight: '700', marginTop: 8,
-                                 letterSpacing: 0.4 }}>
-                    PRIORITY {vlm.priority_score.toFixed(1)} / 10
-                  </Text>
+                {band && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 }}>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: bandBg }}>
+                      <Text style={{ color: bandFg, fontSize: 10, fontWeight: '800', letterSpacing: 0.6 }}>
+                        PRIORITY {band}
+                      </Text>
+                    </View>
+                    {vlm?.priority_score != null && (
+                      <Text style={{ color: p.inkFaint, fontSize: 11, fontWeight: '700' }}>
+                        score {vlm.priority_score.toFixed(1)}
+                      </Text>
+                    )}
+                  </View>
                 )}
               </View>
             </>

@@ -1,49 +1,58 @@
-// Client for the Sorted FastAPI backend.
+// Client for the Sorted FastAPI backend on the DGX Spark.
 //
-// The backend lives in /main.py (FastAPI) + /routers/reports.py + /services/vlm_service.py.
-// It exposes POST /submit-report which:
-//   - accepts multipart/form-data with `image`
-//   - runs the photo through a local Ollama VLM (Nemotron-3 Nano Omni)
-//   - returns priority_score + vlm_analysis (issue_type, severity 1-5, location, description)
+// Backend lives in /main.py + /routers/reports.py + /services/vlm_service.py.
+// Exposed via localtunnel at https://fixmy-council-seeit-sortit.loca.lt.
 //
-// Configure the base URL by editing VLM_BASE_URL below. For DGX→phone access during
-// the demo, Mohammad's runbook is `npx localtunnel --port 8000` → paste the URL here.
+// Endpoint: POST /analyse-report (multipart/form-data)
+//   image (required, binary)
+//   text_description (optional, string) — pre-filled by STT on the phone, future hook
 //
-// If the URL is empty or the request fails, the app falls back to the mock
-// classification flow so the demo still tells a story when the DGX is offline.
+// Response: priority_score + priority_band + analysis{issue_type, severity 1-5,
+// confidence 0-1, raw_label, description, location} + enrichment{borough,
+// tfl_delay_factor, population_density}.
+//
+// Falls back to null (→ mock UI) on empty URL, network failure, or non-200.
 
-// ─── EDIT THIS LINE WHEN MOHAMMAD GIVES YOU THE TUNNEL URL ──────────────
-export const VLM_BASE_URL = ''; // e.g. 'https://sorted-demo.loca.lt'
+// ─── Live tunnel URL (Mohammad's setup) ──────────────────────────────────
+// To swap, just replace this string. Empty string disables the call.
+export const VLM_BASE_URL = 'https://fixmy-council-seeit-sortit.loca.lt';
 // ────────────────────────────────────────────────────────────────────────
 
-const ENDPOINT_PATH = '/submit-report';
-const TIMEOUT_MS = 30_000;
+const ENDPOINT_PATH = '/analyse-report';
+const TIMEOUT_MS = 45_000;
 
 export type VLMAnalysis = {
   issue_type: string;
-  severity: number;
+  severity: number;        // 1-5
   location: string;
   description: string;
+  confidence: number;      // 0-1
+  raw_label: string;
+};
+
+export type VLMEnrichment = {
+  tfl_delay_factor: number;
+  population_density: number;
+  borough?: string;
 };
 
 export type VLMReport = {
   status: string;
   priority_score: number;
-  details: {
-    vlm_analysis: VLMAnalysis;
-    enrichment: {
-      tfl_delay_factor: number;
-      population_density: number;
-    };
-  };
+  priority_band: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' | string;
+  analysis: VLMAnalysis;
+  enrichment: VLMEnrichment;
 };
 
 /**
- * Submit a captured photo to Mohammad's /submit-report endpoint.
- * Returns the parsed response, or null if disabled / failed / timed out.
- * Never throws — caller can always fall through to the mock flow.
+ * Submit a captured photo to /analyse-report.
+ * Returns parsed response or null (disabled / failure / timeout).
+ * Never throws — caller falls through to mock UI.
  */
-export async function submitPhotoForClassification(photoUri: string): Promise<VLMReport | null> {
+export async function submitPhotoForClassification(
+  photoUri: string,
+  textDescription?: string,
+): Promise<VLMReport | null> {
   if (!VLM_BASE_URL) return null;
 
   const controller = new AbortController();
@@ -51,23 +60,29 @@ export async function submitPhotoForClassification(photoUri: string): Promise<VL
 
   try {
     const form = new FormData();
-    // React Native's FormData accepts {uri, name, type} for files (any cast for type strictness).
     form.append('image', {
       uri: photoUri,
       name: 'photo.jpg',
       type: 'image/jpeg',
     } as unknown as Blob);
+    if (textDescription) {
+      form.append('text_description', textDescription);
+    }
 
     const res = await fetch(`${VLM_BASE_URL}${ENDPOINT_PATH}`, {
       method: 'POST',
       body: form,
-      // Don't set Content-Type — RN injects the multipart boundary itself.
-      headers: { Accept: 'application/json' },
+      // RN injects the multipart boundary itself; don't set Content-Type.
+      // bypass-tunnel-reminder skips localtunnel's HTML warning page on the API path.
+      headers: {
+        Accept: 'application/json',
+        'bypass-tunnel-reminder': '1',
+      },
       signal: controller.signal,
     });
     if (!res.ok) return null;
     const data = (await res.json()) as VLMReport;
-    if (!data?.details?.vlm_analysis) return null;
+    if (!data?.analysis) return null;
     return data;
   } catch {
     return null;
@@ -77,9 +92,9 @@ export async function submitPhotoForClassification(photoUri: string): Promise<VL
 }
 
 // ── UI mapping helpers ────────────────────────────────────────────────
-// Map the VLM's free-text issue_type to one of our internal CategoryIcon keys.
 import type { SortedCategory } from './geolocate';
 
+/** Map the VLM's free-text issue_type to one of our CategoryIcon keys. */
 export function mapIssueType(raw: string): { icon: SortedCategory; label: string } {
   const k = (raw || '').toLowerCase().replace(/[-\s]+/g, '_');
   if (k.includes('pothole')) return { icon: 'pothole', label: 'Pothole' };
@@ -99,4 +114,12 @@ export function severityToBadge(s: number): { label: string; tone: 'high' | 'med
   if (s >= 4) return { label: 'High', tone: 'high' };
   if (s >= 3) return { label: 'Medium', tone: 'medium' };
   return { label: 'Low', tone: 'low' };
+}
+
+/** Priority band → a stable color tone for the chip. */
+export function bandTone(band: string): 'high' | 'medium' | 'low' {
+  const up = (band || '').toUpperCase();
+  if (up === 'CRITICAL' || up === 'HIGH') return 'high';
+  if (up === 'MEDIUM') return 'medium';
+  return 'low';
 }
