@@ -3,7 +3,11 @@ import * as Haptics from 'expo-haptics';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { findBoroughForLocation, getDepartmentForCategory, BoroughHit } from './src/lib/geolocate';
+import { findBoroughForLocation, getDepartmentForCategory, BoroughHit, SortedCategory } from './src/lib/geolocate';
+import {
+  submitPhotoForClassification, mapIssueType, severityToBadge,
+  VLMReport, VLM_BASE_URL,
+} from './src/lib/api';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -79,7 +83,8 @@ type Screen = 'welcome' | 'camera' | 'classify' | 'sent' | 'dashboard' | 'settin
 type Tab = 'report' | 'dashboard';
 
 // ── Icons (Views only — zero asset deps) ────────────────────────────────
-type IconKey = 'pothole' | 'flytipping' | 'streetlight' | 'tree' | 'other' | 'graffiti' | 'drain';
+// Aligned to the SortedCategory taxonomy used by the geolocate + api modules.
+type IconKey = SortedCategory;
 
 function CategoryIcon({ kind, size = 26, color = p.green }: { kind: IconKey; size?: number; color?: string }) {
   const s = size;
@@ -360,6 +365,7 @@ function CameraScreen({
   const [phase, setPhase] = useState<'viewfinder' | 'analysing' | 'classified'>('viewfinder');
   const [flash, setFlash] = useState<'off' | 'on'>('off');
   const [hit, setHit] = useState<BoroughHit | null>(null);
+  const [vlm, setVlm] = useState<VLMReport | null>(null);
   const drawer = useRef(new Animated.Value(0)).current;
   const ringPulse = useRef(new Animated.Value(0)).current;
   const cameraRef = useRef<CameraView | null>(null);
@@ -392,23 +398,31 @@ function CameraScreen({
     ).start();
   }, [ringPulse]);
 
-  const runClassification = async (impact: Haptics.ImpactFeedbackStyle) => {
+  const runClassification = async (impact: Haptics.ImpactFeedbackStyle, photoUri?: string) => {
     Haptics.impactAsync(impact);
     setPhase('analysing');
-    const [resolved] = await Promise.all([
+    // Hit the VLM and resolve location in parallel. If VLM is unconfigured or
+    // unreachable, submitPhotoForClassification returns null and we fall back
+    // to the mock pothole below.
+    const minPause = new Promise(r => setTimeout(r, 800));
+    const [resolved, vlmReport] = await Promise.all([
       resolveBorough(),
-      new Promise(r => setTimeout(r, 1200)),
+      photoUri ? submitPhotoForClassification(photoUri) : Promise.resolve(null),
+      minPause,
     ]);
     setHit(resolved);
+    setVlm(vlmReport);
     setPhase('classified');
     Animated.spring(drawer, { toValue: 1, useNativeDriver: true, bounciness: 6 }).start();
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   };
   const onCapture = async () => {
+    let uri: string | undefined;
     try {
-      await cameraRef.current?.takePictureAsync({ quality: 0.6, skipProcessing: true });
-    } catch { /* swallow — still run classification flow for the demo */ }
-    runClassification(Haptics.ImpactFeedbackStyle.Heavy);
+      const photo = await cameraRef.current?.takePictureAsync({ quality: 0.6, skipProcessing: true });
+      uri = photo?.uri;
+    } catch { /* keep going with mock */ }
+    runClassification(Haptics.ImpactFeedbackStyle.Heavy, uri);
   };
   const onPickLibrary = async () => {
     Haptics.selectionAsync();
@@ -420,7 +434,7 @@ function CameraScreen({
       exif: true,
     });
     if (result.canceled) return;
-    runClassification(Haptics.ImpactFeedbackStyle.Light);
+    runClassification(Haptics.ImpactFeedbackStyle.Light, result.assets[0]?.uri);
   };
   const onRetake = () => {
     Haptics.selectionAsync();
@@ -542,39 +556,71 @@ function CameraScreen({
                               transform: [{ translateY: drawerTranslateY }] }}>
         <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: p.border,
                        alignSelf: 'center', marginBottom: 18 }} />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-          <View style={{ width: 50, height: 50, borderRadius: 12, backgroundColor: p.greenChipBg,
-                         alignItems: 'center', justifyContent: 'center' }}>
-            <CategoryIcon kind="pothole" size={26} color={p.green} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: p.ink, fontSize: 19, fontWeight: '800' }}>
-              Pothole <Text style={{ color: p.red }}>· High</Text>
-            </Text>
-            <Text style={{ color: p.inkDim, fontSize: 13, marginTop: 2 }}>
-              {hit
-                ? `${hit.borough.short_name} · ${hit.source === 'polygon' ? '96% confident' : `~${hit.distance_km.toFixed(1)} km from centroid`}`
-                : 'Location not available · using fallback'}
-            </Text>
-          </View>
-        </View>
-        <View style={{ marginTop: 16, padding: 14, backgroundColor: p.cardDim, borderRadius: 10,
-                       borderLeftWidth: 3, borderLeftColor: p.green }}>
-          <Text style={{ color: p.ink, fontSize: 14, lineHeight: 20 }}>
-            {hit ? (
-              <>
-                Send to <Text style={{ fontWeight: '800' }}>
-                  {hit.borough.short_name} — {getDepartmentForCategory(hit.borough, 'pothole')}
-                </Text>. We'll track it and tell you when it's fixed.
-              </>
-            ) : (
-              <>
-                Allow location in <Text style={{ fontWeight: '800' }}>Settings</Text> so we can route this
-                to the right council. Submitting blind goes to Lambeth Highways by default.
-              </>
-            )}
-          </Text>
-        </View>
+        {(() => {
+          // Resolve display fields — prefer real VLM; fall back to a mock pothole when offline.
+          const vlmA = vlm?.details.vlm_analysis;
+          const cat = vlmA ? mapIssueType(vlmA.issue_type) : { icon: 'pothole' as SortedCategory, label: 'Pothole' };
+          const sev = severityToBadge(vlmA?.severity ?? 4);
+          const sevColor = sev.tone === 'high' ? p.red : sev.tone === 'medium' ? p.amber : p.green;
+          const isLive = !!vlmA;
+          const dept = hit ? getDepartmentForCategory(hit.borough, cat.icon) : 'Highways';
+          return (
+            <>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                <View style={{ width: 50, height: 50, borderRadius: 12, backgroundColor: p.greenChipBg,
+                               alignItems: 'center', justifyContent: 'center' }}>
+                  <CategoryIcon kind={cat.icon} size={26} color={p.green} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: p.ink, fontSize: 19, fontWeight: '800' }}>
+                    {cat.label} <Text style={{ color: sevColor }}>· {sev.label}</Text>
+                  </Text>
+                  <Text style={{ color: p.inkDim, fontSize: 13, marginTop: 2 }}>
+                    {hit
+                      ? `${hit.borough.short_name} · ${hit.source === 'polygon' ? 'GPS confirmed' : `~${hit.distance_km.toFixed(1)} km from centroid`}`
+                      : 'Location not available · using fallback'}
+                  </Text>
+                </View>
+                {/* Tiny source indicator */}
+                <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999,
+                               backgroundColor: isLive ? p.greenChipBg : p.borderSoft }}>
+                  <Text style={{ color: isLive ? p.green : p.inkFaint, fontSize: 10, fontWeight: '800',
+                                 letterSpacing: 0.6 }}>
+                    {isLive ? 'NEMOTRON' : 'OFFLINE'}
+                  </Text>
+                </View>
+              </View>
+              {vlmA?.description && (
+                <Text style={{ color: p.inkDim, fontSize: 13, lineHeight: 18, marginTop: 12 }}>
+                  "{vlmA.description}"
+                </Text>
+              )}
+              <View style={{ marginTop: 16, padding: 14, backgroundColor: p.cardDim, borderRadius: 10,
+                             borderLeftWidth: 3, borderLeftColor: p.green }}>
+                <Text style={{ color: p.ink, fontSize: 14, lineHeight: 20 }}>
+                  {hit ? (
+                    <>
+                      Send to <Text style={{ fontWeight: '800' }}>
+                        {hit.borough.short_name} — {dept}
+                      </Text>. We'll track it and tell you when it's fixed.
+                    </>
+                  ) : (
+                    <>
+                      Allow location in <Text style={{ fontWeight: '800' }}>Settings</Text> so we can route this
+                      to the right council. Submitting blind goes to Lambeth Highways by default.
+                    </>
+                  )}
+                </Text>
+                {vlm?.priority_score != null && (
+                  <Text style={{ color: p.inkFaint, fontSize: 11, fontWeight: '700', marginTop: 8,
+                                 letterSpacing: 0.4 }}>
+                    PRIORITY {vlm.priority_score.toFixed(1)} / 10
+                  </Text>
+                )}
+              </View>
+            </>
+          );
+        })()}
         <Pressable onPress={onSend} style={({ pressed }) => [{ backgroundColor: p.green, borderRadius: 12,
                    paddingVertical: 16, marginTop: 14, alignItems: 'center', opacity: pressed ? 0.9 : 1 }]}>
           <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>Send report</Text>
