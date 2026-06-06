@@ -3,7 +3,11 @@ import * as Haptics from 'expo-haptics';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
-import { findBoroughForLocation, getDepartmentForCategory, BoroughHit } from './src/lib/geolocate';
+import { findBoroughForLocation, getDepartmentForCategory, BoroughHit, SortedCategory } from './src/lib/geolocate';
+import {
+  submitPhotoForClassification, mapIssueType, severityToBadge, bandTone,
+  VLMReport, VLM_BASE_URL,
+} from './src/lib/api';
 import { ReactNode, useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -79,7 +83,8 @@ type Screen = 'welcome' | 'camera' | 'classify' | 'sent' | 'dashboard' | 'settin
 type Tab = 'report' | 'dashboard';
 
 // ── Icons (Views only — zero asset deps) ────────────────────────────────
-type IconKey = 'pothole' | 'flytipping' | 'streetlight' | 'tree' | 'other' | 'graffiti' | 'drain';
+// Aligned to the SortedCategory taxonomy used by the geolocate + api modules.
+type IconKey = SortedCategory;
 
 function CategoryIcon({ kind, size = 26, color = p.green }: { kind: IconKey; size?: number; color?: string }) {
   const s = size;
@@ -349,25 +354,6 @@ function WelcomeScreen({ onStart }: { onStart: () => void }) {
   );
 }
 
-type ClassificationResult = {
-  status: string;
-  priority_score: number;
-  priority_band: string;
-  analysis: {
-    issue_type: string;
-    severity: number;
-    location: string;
-    description: string;
-    confidence: number;
-    raw_label: string;
-  };
-  enrichment: {
-    tfl_delay_factor: number;
-    population_density: number;
-    borough: string;
-  };
-};
-
 // ── Camera screen + classification drawer ───────────────────────────────
 function CameraScreen({
   onClassified,
@@ -379,7 +365,7 @@ function CameraScreen({
   const [phase, setPhase] = useState<'viewfinder' | 'analysing' | 'classified'>('viewfinder');
   const [flash, setFlash] = useState<'off' | 'on'>('off');
   const [hit, setHit] = useState<BoroughHit | null>(null);
-  const [apiResult, setApiResult] = useState<ClassificationResult | null>(null);
+  const [vlm, setVlm] = useState<VLMReport | null>(null);
   const drawer = useRef(new Animated.Value(0)).current;
   const ringPulse = useRef(new Animated.Value(0)).current;
   const cameraRef = useRef<CameraView | null>(null);
@@ -391,13 +377,42 @@ function CameraScreen({
     }
   }, [permission, requestPermission]);
 
-  // Resolve current location → borough on mount (best-effort; null if denied)
-  async function resolveBorough(): Promise<BoroughHit | null> {
+  // Pull GPS from a picked photo's EXIF. iOS stores lat/lon as ABSOLUTE values
+  // with a separate Ref ("N"/"S", "E"/"W") for the sign — so for London (west of
+  // Greenwich) GPSLongitude is +0.13 with GPSLongitudeRef="W" meaning real -0.13.
+  // Falling back without the ref → coords land in the wrong hemisphere.
+  function extractExifGps(exif: unknown): { lat: number; lon: number } | undefined {
+    if (!exif || typeof exif !== 'object') {
+      console.log('[Library] no EXIF object');
+      return undefined;
+    }
+    const e = exif as Record<string, unknown>;
+    // Some EXIF parsers nest under {GPS: {...}}, others put keys flat. Try both.
+    const gps = (typeof e.GPS === 'object' && e.GPS) ? e.GPS as Record<string, unknown> : e;
+    const lat = typeof gps.GPSLatitude === 'number' ? gps.GPSLatitude as number : undefined;
+    const lon = typeof gps.GPSLongitude === 'number' ? gps.GPSLongitude as number : undefined;
+    if (lat == null || lon == null) {
+      console.log('[Library] EXIF has no GPS — keys:', Object.keys(e).slice(0, 12).join(','));
+      return undefined;
+    }
+    const latRef = typeof gps.GPSLatitudeRef === 'string' ? (gps.GPSLatitudeRef as string).toUpperCase() : 'N';
+    const lonRef = typeof gps.GPSLongitudeRef === 'string' ? (gps.GPSLongitudeRef as string).toUpperCase() : 'E';
+    const signedLat = latRef === 'S' ? -Math.abs(lat) : Math.abs(lat);
+    const signedLon = lonRef === 'W' ? -Math.abs(lon) : Math.abs(lon);
+    console.log('[Library] EXIF GPS:', signedLat.toFixed(5), signedLon.toFixed(5),
+                '(refs:', latRef, lonRef, ')');
+    return { lat: signedLat, lon: signedLon };
+  }
+
+  // Get GPS once, then derive borough locally. Returns null if denied.
+  async function getCoordsAndBorough(): Promise<{ lat: number; lon: number; hit: BoroughHit | null } | null> {
     try {
       const perm = await Location.requestForegroundPermissionsAsync();
       if (perm.status !== 'granted') return null;
       const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      return findBoroughForLocation(loc.coords.latitude, loc.coords.longitude);
+      const lat = loc.coords.latitude;
+      const lon = loc.coords.longitude;
+      return { lat, lon, hit: findBoroughForLocation(lat, lon) };
     } catch {
       return null;
     }
@@ -412,48 +427,44 @@ function CameraScreen({
     ).start();
   }, [ringPulse]);
 
-  const runClassification = async (impact: Haptics.ImpactFeedbackStyle, photoUri?: string) => {
+  const runClassification = async (
+    impact: Haptics.ImpactFeedbackStyle,
+    photoUri?: string,
+    overrideCoords?: { lat: number; lon: number },
+    source: 'capture' | 'library' = 'capture',
+  ) => {
     Haptics.impactAsync(impact);
     setPhase('analysing');
-    
-    const resolved = await resolveBorough();
-    setHit(resolved);
+    // Coord rules:
+    //   - Library photo with EXIF GPS → use EXIF (photo's own location)
+    //   - Library photo WITHOUT EXIF GPS → send no coords. Falling back to
+    //     current GPS would mislead the model (you may have moved since).
+    //   - Fresh Capture → current GPS (you're literally at the problem).
+    let lat: number | undefined, lon: number | undefined;
+    let resolvedHit: BoroughHit | null = null;
+    if (overrideCoords) {
+      lat = overrideCoords.lat; lon = overrideCoords.lon;
+      resolvedHit = findBoroughForLocation(lat, lon);
+    } else if (source === 'capture') {
+      const where = await getCoordsAndBorough();
+      lat = where?.lat; lon = where?.lon; resolvedHit = where?.hit ?? null;
+    } // library + no EXIF → leave lat/lon undefined, send no hints
+    setHit(resolvedHit);
+    console.log('[Classify] source:', source, 'lat:', lat, 'lon:', lon,
+                'borough:', resolvedHit?.borough.name);
 
-    let apiResponse: ClassificationResult | null = null;
-    if (photoUri) {
-      try {
-        const formData = new FormData();
-        formData.append('image', {
-          uri: photoUri,
-          name: 'photo.jpg',
-          type: 'image/jpeg',
-        } as any);
-
-        if (resolved) {
-          formData.append('borough', resolved.borough.name);
-        }
-
-        const res = await fetch('https://fixmy-council-seeit-sortit.loca.lt/analyse-report', {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        
-        if (res.ok) {
-          apiResponse = await res.json();
-        } else {
-          console.error("API error", await res.text());
-        }
-      } catch (err) {
-        console.error("Fetch error", err);
-      }
-    } else {
-      await new Promise(r => setTimeout(r, 1200));
-    }
-
-    setApiResult(apiResponse);
+    // 2) VLM with grounding hints, parallel with a min 800ms dramatic pause.
+    const [vlmReport] = await Promise.all([
+      photoUri
+        ? submitPhotoForClassification(photoUri, {
+            latitude: lat,
+            longitude: lon,
+            borough: resolvedHit?.borough.name,
+          })
+        : Promise.resolve(null),
+      new Promise(r => setTimeout(r, 800)),
+    ]);
+    setVlm(vlmReport);
     setPhase('classified');
     Animated.spring(drawer, { toValue: 1, useNativeDriver: true, bounciness: 6 }).start();
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -461,10 +472,10 @@ function CameraScreen({
   const onCapture = async () => {
     let uri: string | undefined;
     try {
-      const pic = await cameraRef.current?.takePictureAsync({ quality: 0.6, skipProcessing: true });
-      uri = pic?.uri;
-    } catch { /* swallow — still run classification flow for the demo */ }
-    runClassification(Haptics.ImpactFeedbackStyle.Heavy, uri);
+      const photo = await cameraRef.current?.takePictureAsync({ quality: 0.6, skipProcessing: true });
+      uri = photo?.uri;
+    } catch { /* keep going with mock */ }
+    runClassification(Haptics.ImpactFeedbackStyle.Heavy, uri, undefined, 'capture');
   };
   const onPickLibrary = async () => {
     Haptics.selectionAsync();
@@ -475,8 +486,11 @@ function CameraScreen({
       quality: 0.7,
       exif: true,
     });
-    if (result.canceled || !result.assets[0].uri) return;
-    runClassification(Haptics.ImpactFeedbackStyle.Light, result.assets[0].uri);
+    if (result.canceled) return;
+    const asset = result.assets[0];
+    if (!asset?.uri) return;
+    const exifCoords = extractExifGps(asset.exif);
+    runClassification(Haptics.ImpactFeedbackStyle.Light, asset.uri, exifCoords, 'library');
   };
   const onRetake = () => {
     Haptics.selectionAsync();
@@ -598,46 +612,89 @@ function CameraScreen({
                               transform: [{ translateY: drawerTranslateY }] }}>
         <View style={{ width: 36, height: 4, borderRadius: 2, backgroundColor: p.border,
                        alignSelf: 'center', marginBottom: 18 }} />
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-          <View style={{ width: 50, height: 50, borderRadius: 12, backgroundColor: p.greenChipBg,
-                         alignItems: 'center', justifyContent: 'center' }}>
-            <CategoryIcon kind={(apiResult?.analysis.issue_type as IconKey) || 'pothole'} size={26} color={p.green} />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: p.ink, fontSize: 19, fontWeight: '800' }}>
-              {apiResult ? (apiResult.analysis.raw_label || apiResult.analysis.issue_type) : 'Pothole'} <Text style={{ color: p.red }}>· {apiResult ? apiResult.priority_band : 'High'}</Text>
-            </Text>
-            <Text style={{ color: p.inkDim, fontSize: 13, marginTop: 2 }}>
-              {apiResult ? `${Math.round(apiResult.analysis.confidence * 100)}% confident · Priority Score: ${apiResult.priority_score}` : (
-                hit
-                  ? `${hit.borough.short_name} · ${hit.source === 'polygon' ? '96% confident' : `~${hit.distance_km.toFixed(1)} km from centroid`}`
-                  : 'Location not available · using fallback'
+        {(() => {
+          // Prefer real VLM; fall back to a mock pothole when offline.
+          const vlmA = vlm?.analysis;
+          const cat = vlmA ? mapIssueType(vlmA.issue_type) : { icon: 'pothole' as SortedCategory, label: 'Pothole' };
+          const sev = severityToBadge(vlmA?.severity ?? 4);
+          const sevColor = sev.tone === 'high' ? p.red : sev.tone === 'medium' ? p.amber : p.green;
+          const isLive = !!vlmA;
+          // Backend borough beats GPS when available (it's enriched with the
+          // VLM's location hint + density lookup).
+          const backendBorough = vlm?.enrichment?.borough;
+          const dept = hit ? getDepartmentForCategory(hit.borough, cat.icon) : 'Highways';
+          const boroughLabel = backendBorough ?? hit?.borough.short_name;
+          const locationLine = vlmA
+            ? `${boroughLabel ?? vlmA.location} · ${Math.round((vlmA.confidence ?? 0) * 100)}% confident`
+            : hit
+              ? `${hit.borough.short_name} · ${hit.source === 'polygon' ? 'GPS confirmed' : `~${hit.distance_km.toFixed(1)} km from centroid`}`
+              : 'Location not available · using fallback';
+          // Priority band styling
+          const band = vlm?.priority_band;
+          const bandT = band ? bandTone(band) : null;
+          const bandBg = bandT === 'high' ? '#FDE7E7' : bandT === 'medium' ? p.amberSoft : p.greenChipBg;
+          const bandFg = bandT === 'high' ? p.red : bandT === 'medium' ? p.amber : p.green;
+          return (
+            <>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                <View style={{ width: 50, height: 50, borderRadius: 12, backgroundColor: p.greenChipBg,
+                               alignItems: 'center', justifyContent: 'center' }}>
+                  <CategoryIcon kind={cat.icon} size={26} color={p.green} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: p.ink, fontSize: 19, fontWeight: '800' }}>
+                    {cat.label} <Text style={{ color: sevColor }}>· {sev.label}</Text>
+                  </Text>
+                  <Text style={{ color: p.inkDim, fontSize: 13, marginTop: 2 }}>{locationLine}</Text>
+                </View>
+                {/* Tiny source indicator */}
+                <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 999,
+                               backgroundColor: isLive ? p.greenChipBg : p.borderSoft }}>
+                  <Text style={{ color: isLive ? p.green : p.inkFaint, fontSize: 10, fontWeight: '800',
+                                 letterSpacing: 0.6 }}>
+                    {isLive ? 'NEMOTRON' : 'OFFLINE'}
+                  </Text>
+                </View>
+              </View>
+              {vlmA?.description && (
+                <Text style={{ color: p.inkDim, fontSize: 13, lineHeight: 18, marginTop: 12 }}>
+                  "{vlmA.description}"
+                </Text>
               )}
-            </Text>
-          </View>
-        </View>
-        {apiResult?.analysis.description && (
-          <Text style={{ color: p.inkDim, fontSize: 14, marginTop: 12, fontStyle: 'italic' }}>
-            "{apiResult.analysis.description}"
-          </Text>
-        )}
-        <View style={{ marginTop: 16, padding: 14, backgroundColor: p.cardDim, borderRadius: 10,
-                       borderLeftWidth: 3, borderLeftColor: p.green }}>
-          <Text style={{ color: p.ink, fontSize: 14, lineHeight: 20 }}>
-            {hit ? (
-              <>
-                Send to <Text style={{ fontWeight: '800' }}>
-                  {hit.borough.short_name} — {getDepartmentForCategory(hit.borough, (apiResult?.analysis.issue_type as IconKey) || 'pothole')}
-                </Text>. We'll track it and tell you when it's fixed.
-              </>
-            ) : (
-              <>
-                Allow location in <Text style={{ fontWeight: '800' }}>Settings</Text> so we can route this
-                to the right council. Submitting blind goes to Lambeth Highways by default.
-              </>
-            )}
-          </Text>
-        </View>
+              <View style={{ marginTop: 16, padding: 14, backgroundColor: p.cardDim, borderRadius: 10,
+                             borderLeftWidth: 3, borderLeftColor: p.green }}>
+                <Text style={{ color: p.ink, fontSize: 14, lineHeight: 20 }}>
+                  {hit || backendBorough ? (
+                    <>
+                      Send to <Text style={{ fontWeight: '800' }}>
+                        {boroughLabel} — {dept}
+                      </Text>. We'll track it and tell you when it's fixed.
+                    </>
+                  ) : (
+                    <>
+                      Allow location in <Text style={{ fontWeight: '800' }}>Settings</Text> so we can route this
+                      to the right council. Submitting blind goes to Lambeth Highways by default.
+                    </>
+                  )}
+                </Text>
+                {band && (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 10 }}>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, backgroundColor: bandBg }}>
+                      <Text style={{ color: bandFg, fontSize: 10, fontWeight: '800', letterSpacing: 0.6 }}>
+                        PRIORITY {band}
+                      </Text>
+                    </View>
+                    {vlm?.priority_score != null && (
+                      <Text style={{ color: p.inkFaint, fontSize: 11, fontWeight: '700' }}>
+                        score {vlm.priority_score.toFixed(1)}
+                      </Text>
+                    )}
+                  </View>
+                )}
+              </View>
+            </>
+          );
+        })()}
         <Pressable onPress={onSend} style={({ pressed }) => [{ backgroundColor: p.green, borderRadius: 12,
                    paddingVertical: 16, marginTop: 14, alignItems: 'center', opacity: pressed ? 0.9 : 1 }]}>
           <Text style={{ color: '#fff', fontSize: 16, fontWeight: '800' }}>Send report</Text>
