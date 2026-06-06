@@ -70,10 +70,11 @@ export async function submitPhotoForClassification(
   }
   console.log('[VLM] uri:', photoUri?.slice(0, 60), 'hints:', JSON.stringify(hints));
 
-  const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-  try {
+  // We use XMLHttpRequest instead of fetch() because Expo 56's WinterCG
+  // fetch shim has a broken FormData converter that doesn't recognize React
+  // Native's {uri, name, type} file-part shape. XHR uses RN's native
+  // networking path which handles FormData files correctly.
+  return new Promise<VLMReport | null>((resolve) => {
     const form = new FormData();
     form.append('image', {
       uri: photoUri,
@@ -85,36 +86,42 @@ export async function submitPhotoForClassification(
     if (hints.latitude  != null) form.append('latitude',  String(hints.latitude));
     if (hints.longitude != null) form.append('longitude', String(hints.longitude));
 
-    const res = await fetch(`${VLM_BASE_URL}${ENDPOINT_PATH}`, {
-      method: 'POST',
-      body: form,
-      // RN injects the multipart boundary itself; don't set Content-Type.
-      // bypass-tunnel-reminder skips localtunnel's HTML warning page on the API path.
-      headers: {
-        Accept: 'application/json',
-        'bypass-tunnel-reminder': '1',
-      },
-      signal: controller.signal,
-    });
-    console.log('[VLM] response status:', res.status);
-    if (!res.ok) {
-      const body = await res.text().catch(() => '<unreadable>');
-      console.log('[VLM] non-200 body:', body.slice(0, 200));
-      return null;
-    }
-    const data = (await res.json()) as VLMReport;
-    if (!data?.analysis) {
-      console.log('[VLM] missing analysis key in body');
-      return null;
-    }
-    console.log('[VLM] OK — type:', data.analysis.issue_type, 'conf:', data.analysis.confidence, 'borough:', data.enrichment?.borough);
-    return data;
-  } catch (err) {
-    console.log('[VLM] fetch error:', String(err).slice(0, 200));
-    return null;
-  } finally {
-    clearTimeout(t);
-  }
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${VLM_BASE_URL}${ENDPOINT_PATH}`);
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('bypass-tunnel-reminder', '1');
+    xhr.timeout = TIMEOUT_MS;
+    xhr.onload = () => {
+      console.log('[VLM] response status:', xhr.status);
+      if (xhr.status < 200 || xhr.status >= 300) {
+        console.log('[VLM] non-200 body:', String(xhr.responseText).slice(0, 200));
+        return resolve(null);
+      }
+      try {
+        const data = JSON.parse(xhr.responseText) as VLMReport;
+        if (!data?.analysis) {
+          console.log('[VLM] missing analysis key in body');
+          return resolve(null);
+        }
+        console.log('[VLM] OK — type:', data.analysis.issue_type,
+                    'conf:', data.analysis.confidence,
+                    'borough:', data.enrichment?.borough);
+        resolve(data);
+      } catch (e) {
+        console.log('[VLM] parse error:', String(e).slice(0, 120));
+        resolve(null);
+      }
+    };
+    xhr.onerror = () => {
+      console.log('[VLM] xhr error — status:', xhr.status, 'text:', String(xhr.responseText).slice(0, 120));
+      resolve(null);
+    };
+    xhr.ontimeout = () => {
+      console.log('[VLM] timeout after', TIMEOUT_MS, 'ms');
+      resolve(null);
+    };
+    xhr.send(form as unknown as Document);
+  });
 }
 
 // ── UI mapping helpers ────────────────────────────────────────────────
