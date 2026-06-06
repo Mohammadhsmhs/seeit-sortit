@@ -377,6 +377,33 @@ function CameraScreen({
     }
   }, [permission, requestPermission]);
 
+  // Pull GPS from a picked photo's EXIF. iOS stores lat/lon as ABSOLUTE values
+  // with a separate Ref ("N"/"S", "E"/"W") for the sign — so for London (west of
+  // Greenwich) GPSLongitude is +0.13 with GPSLongitudeRef="W" meaning real -0.13.
+  // Falling back without the ref → coords land in the wrong hemisphere.
+  function extractExifGps(exif: unknown): { lat: number; lon: number } | undefined {
+    if (!exif || typeof exif !== 'object') {
+      console.log('[Library] no EXIF object');
+      return undefined;
+    }
+    const e = exif as Record<string, unknown>;
+    // Some EXIF parsers nest under {GPS: {...}}, others put keys flat. Try both.
+    const gps = (typeof e.GPS === 'object' && e.GPS) ? e.GPS as Record<string, unknown> : e;
+    const lat = typeof gps.GPSLatitude === 'number' ? gps.GPSLatitude as number : undefined;
+    const lon = typeof gps.GPSLongitude === 'number' ? gps.GPSLongitude as number : undefined;
+    if (lat == null || lon == null) {
+      console.log('[Library] EXIF has no GPS — keys:', Object.keys(e).slice(0, 12).join(','));
+      return undefined;
+    }
+    const latRef = typeof gps.GPSLatitudeRef === 'string' ? (gps.GPSLatitudeRef as string).toUpperCase() : 'N';
+    const lonRef = typeof gps.GPSLongitudeRef === 'string' ? (gps.GPSLongitudeRef as string).toUpperCase() : 'E';
+    const signedLat = latRef === 'S' ? -Math.abs(lat) : Math.abs(lat);
+    const signedLon = lonRef === 'W' ? -Math.abs(lon) : Math.abs(lon);
+    console.log('[Library] EXIF GPS:', signedLat.toFixed(5), signedLon.toFixed(5),
+                '(refs:', latRef, lonRef, ')');
+    return { lat: signedLat, lon: signedLon };
+  }
+
   // Get GPS once, then derive borough locally. Returns null if denied.
   async function getCoordsAndBorough(): Promise<{ lat: number; lon: number; hit: BoroughHit | null } | null> {
     try {
@@ -404,23 +431,27 @@ function CameraScreen({
     impact: Haptics.ImpactFeedbackStyle,
     photoUri?: string,
     overrideCoords?: { lat: number; lon: number },
+    source: 'capture' | 'library' = 'capture',
   ) => {
     Haptics.impactAsync(impact);
     setPhase('analysing');
-    // 1) Pick coords: prefer the photo's EXIF GPS (where the issue IS) over the
-    //    user's current location (where the user IS RIGHT NOW). Falls back to
-    //    current GPS for fresh Capture, or null if denied.
+    // Coord rules:
+    //   - Library photo with EXIF GPS → use EXIF (photo's own location)
+    //   - Library photo WITHOUT EXIF GPS → send no coords. Falling back to
+    //     current GPS would mislead the model (you may have moved since).
+    //   - Fresh Capture → current GPS (you're literally at the problem).
     let lat: number | undefined, lon: number | undefined;
     let resolvedHit: BoroughHit | null = null;
     if (overrideCoords) {
       lat = overrideCoords.lat; lon = overrideCoords.lon;
       resolvedHit = findBoroughForLocation(lat, lon);
-    } else {
+    } else if (source === 'capture') {
       const where = await getCoordsAndBorough();
       lat = where?.lat; lon = where?.lon; resolvedHit = where?.hit ?? null;
-    }
+    } // library + no EXIF → leave lat/lon undefined, send no hints
     setHit(resolvedHit);
-    console.log('[Classify] lat:', lat, 'lon:', lon, 'borough:', resolvedHit?.borough.name);
+    console.log('[Classify] source:', source, 'lat:', lat, 'lon:', lon,
+                'borough:', resolvedHit?.borough.name);
 
     // 2) VLM with grounding hints, parallel with a min 800ms dramatic pause.
     const [vlmReport] = await Promise.all([
@@ -444,7 +475,7 @@ function CameraScreen({
       const photo = await cameraRef.current?.takePictureAsync({ quality: 0.6, skipProcessing: true });
       uri = photo?.uri;
     } catch { /* keep going with mock */ }
-    runClassification(Haptics.ImpactFeedbackStyle.Heavy, uri);
+    runClassification(Haptics.ImpactFeedbackStyle.Heavy, uri, undefined, 'capture');
   };
   const onPickLibrary = async () => {
     Haptics.selectionAsync();
@@ -458,16 +489,8 @@ function CameraScreen({
     if (result.canceled) return;
     const asset = result.assets[0];
     if (!asset?.uri) return;
-    // For library photos, prefer the photo's own EXIF GPS — it's where the
-    // problem actually IS, not where the user is sitting now.
-    const exif = asset.exif as Record<string, unknown> | undefined;
-    const exifLat = typeof exif?.GPSLatitude === 'number' ? exif.GPSLatitude as number : undefined;
-    const exifLon = typeof exif?.GPSLongitude === 'number' ? exif.GPSLongitude as number : undefined;
-    const overrideCoords =
-      exifLat != null && exifLon != null ? { lat: exifLat, lon: exifLon } : undefined;
-    console.log('[Library] uri:', asset.uri?.slice(0, 60),
-                'has EXIF GPS?', !!overrideCoords, 'exif keys:', exif ? Object.keys(exif).slice(0, 10).join(',') : 'none');
-    runClassification(Haptics.ImpactFeedbackStyle.Light, asset.uri, overrideCoords);
+    const exifCoords = extractExifGps(asset.exif);
+    runClassification(Haptics.ImpactFeedbackStyle.Light, asset.uri, exifCoords, 'library');
   };
   const onRetake = () => {
     Haptics.selectionAsync();
