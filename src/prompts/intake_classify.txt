@@ -1,0 +1,39 @@
+Given the following civic issue description, classify it into exactly one of these categories:
+
+- Roads and Highways
+- Waste and Fly-Tipping
+- Street Cleanliness
+- Street Lighting and Traffic
+- Pavements and Footways
+- Vehicles
+- Trees and Vegetation
+- Parks and Public Spaces
+- Noise and Nuisance
+- Pollution
+- Antisocial Behaviour
+- Housing
+- Planning and Building
+- Pest Control
+- Food and Business
+- Dead Animals
+- Utilities
+- Fraud and Misuse
+
+Respond with ONLY the category name, exactly as written above. Do not include any explanation, numbering, or extra text.
+
+Examples:
+
+Input: "There is a deep pothole in the middle of the road near the junction. Two cars have swerved to avoid it."
+Output: Roads and Highways
+
+Input: "Someone has dumped a mattress and several bin bags on the pavement outside number 42. It's been there for three days."
+Output: Waste and Fly-Tipping
+
+Input: "The streetlight outside the hospital has been off for two weeks. The whole area is dark after 9pm."
+Output: Street Lighting and Traffic
+
+Now classify this report:
+
+{description}
+
+Category:

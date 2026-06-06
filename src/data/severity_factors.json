@@ -1,0 +1,186 @@
+{
+  "description": "Severity scoring model for London civic issues. Final score = base_severity + sum(applicable modifiers). Scale: 1-10, where 10 = life-threatening emergency.",
+  "max_score": 10,
+  "base_severity": {
+    "Pothole": 4,
+    "Potholes and Road Surface Damage": 4,
+    "Blocked Drains and Flooding": 5,
+    "Road Signs and Markings": 2,
+    "Safety Barriers and Railings": 5,
+    "Debris and Spillage on Road": 5,
+    "Roadworks Obstruction": 3,
+    "Fly-Tipping": 3,
+    "Fly-tipping": 3,
+    "Overflowing Bins": 2,
+    "Missed Bin Collection": 2,
+    "Damaged or Missing Bins": 1,
+    "Graffiti": 1,
+    "Dog Fouling": 1,
+    "Fly-Posting": 1,
+    "Litter Accumulation": 2,
+    "Streetlight Out": 2,
+    "Streetlight Fault": 2,
+    "Traffic Light Fault": 6,
+    "Pavement Damage": 3,
+    "Pavement Obstruction": 3,
+    "Abandoned Vehicles": 2,
+    "Abandoned Bikes and E-Scooters": 2,
+    "Illegal Parking": 2,
+    "Damaged EV Charging Point": 2,
+    "Fallen Trees and Dangerous Branches": 6,
+    "Dead or Diseased Trees": 2,
+    "Invasive Species": 4,
+    "Overgrown Vegetation": 2,
+    "Playground Equipment Damage": 5,
+    "Park Furniture and Facilities": 2,
+    "Park Cleanliness and Paths": 2,
+    "Noise Complaint": 2,
+    "Air and Smoke Pollution": 4,
+    "Water and Land Contamination": 5,
+    "Smell and Light Pollution": 2,
+    "Drug Paraphernalia and Needles": 7,
+    "Vandalism": 2,
+    "Rough Sleeping Encampments": 2,
+    "Illegal Bonfires": 5,
+    "Council Housing Repairs": 3,
+    "Private Rental Conditions": 3,
+    "Dangerous Buildings": 9,
+    "Illegal Eviction": 7,
+    "Short-Term Let Violations": 2,
+    "Unauthorised Building Works": 2,
+    "Dangerous Structures": 9,
+    "Rat and Mouse Infestations": 3,
+    "Insect Infestations": 3,
+    "Pigeon and Bird Nuisance": 1,
+    "Food Safety Concerns": 4,
+    "Licensing Violations": 2,
+    "Dead Animal on Road or Public Land": 2,
+    "Water Leak or Burst Main": 6,
+    "Gas Leak": 10,
+    "Electrical Hazard": 9,
+    "Damaged Manhole or Utility Cover": 4,
+    "Council Tax Fraud": 2,
+    "Blue Badge Misuse": 1
+  },
+  "proximity_modifiers": {
+    "school_within_100m": {
+      "modifier": 2,
+      "rationale": "Children are vulnerable; issues near schools pose elevated risk and public concern"
+    },
+    "hospital_within_200m": {
+      "modifier": 2,
+      "rationale": "Hospitals serve vulnerable populations; access and safety are critical"
+    },
+    "care_home_within_100m": {
+      "modifier": 1,
+      "rationale": "Elderly and disabled residents are more vulnerable to trip hazards, pollution, and noise"
+    },
+    "playground_within_50m": {
+      "modifier": 2,
+      "rationale": "Children are directly exposed; drug paraphernalia, fly-tipping, and hazards near playgrounds are highest priority"
+    },
+    "busy_road_a_road_or_above": {
+      "modifier": 1,
+      "rationale": "Higher traffic volume means more people affected and greater accident risk (DfT AADF data)"
+    },
+    "road_with_collision_history": {
+      "modifier": 1,
+      "rationale": "Roads with STATS19 collision records in past 3 years indicate elevated risk"
+    },
+    "conservation_area": {
+      "modifier": 1,
+      "rationale": "Planning and visual issues in conservation areas have stricter enforcement requirements"
+    },
+    "near_waterway_within_50m": {
+      "modifier": 1,
+      "rationale": "Pollution and contamination risk to waterways; may require Environment Agency notification"
+    }
+  },
+  "repeat_report_modifier": {
+    "2_reports_same_location_30_days": {
+      "modifier": 1,
+      "rationale": "Multiple reports suggest the issue is persistent and unfixed"
+    },
+    "3_reports_same_area_30_days": {
+      "modifier": 1,
+      "rationale": "Cluster of reports in same area (250m radius) suggests systemic problem"
+    },
+    "5_reports_same_area_30_days": {
+      "modifier": 2,
+      "rationale": "Significant cluster; likely a hotspot requiring prioritised attention"
+    },
+    "previously_reported_and_unfixed_60_days": {
+      "modifier": 2,
+      "rationale": "Issue was reported before but not resolved within standard SLA; council has failed to act"
+    }
+  },
+  "population_density_modifier": {
+    "high_density_area": {
+      "modifier": 1,
+      "threshold_persons_per_hectare": 100,
+      "rationale": "More people affected by the issue; Census 2021 LSOA population density data"
+    },
+    "very_high_density_area": {
+      "modifier": 2,
+      "threshold_persons_per_hectare": 200,
+      "rationale": "Dense urban area (central London boroughs); significantly more people affected"
+    }
+  },
+  "hazardous_material_modifier": {
+    "asbestos_present": {
+      "modifier": 3,
+      "rationale": "Asbestos is a serious carcinogen requiring specialist removal; do not disturb"
+    },
+    "needles_or_sharps": {
+      "modifier": 2,
+      "rationale": "Immediate bloodborne infection risk; already reflected in base severity but compounds near schools"
+    },
+    "chemical_or_toxic_substance": {
+      "modifier": 2,
+      "rationale": "Toxic substances require specialist response and may affect wider area"
+    }
+  },
+  "time_of_day_modifier": {
+    "night_time_streetlight_fault": {
+      "modifier": 2,
+      "rationale": "Streetlight faults are safety-critical after dark but irrelevant during daytime"
+    },
+    "night_time_noise": {
+      "modifier": 1,
+      "rationale": "Noise at night (11pm-7am) has stricter regulations and greater impact on health"
+    },
+    "school_hours_nearby_school": {
+      "modifier": 1,
+      "rationale": "Issues near schools during arrival/departure times (8-9am, 3-4pm) have elevated risk"
+    }
+  },
+  "access_impact_modifier": {
+    "blocking_road_completely": {
+      "modifier": 2,
+      "rationale": "Complete road blockage affects emergency vehicle access and traffic flow"
+    },
+    "blocking_pavement": {
+      "modifier": 1,
+      "rationale": "Pedestrians forced onto road; wheelchair and pushchair users particularly affected"
+    },
+    "blocking_emergency_access": {
+      "modifier": 3,
+      "rationale": "Any issue preventing emergency vehicle access is critical"
+    }
+  },
+  "scoring_notes": {
+    "cap": "Final score is capped at 10. Scores above 10 from modifiers are clamped.",
+    "emergency_threshold": "Score >= 8 triggers emergency routing (999, gas emergency line, UK Power Networks emergency).",
+    "urgent_threshold": "Score >= 6 triggers urgent routing (24-48 hour expected response).",
+    "standard_threshold": "Score < 6 follows standard council SLA (typically 5-28 days).",
+    "data_sources": [
+      "Census 2021 LSOA population density (ONS/London Datastore)",
+      "STATS19 collision data (DfT/London Datastore)",
+      "DfT AADF traffic volume counts",
+      "GIAS schools register",
+      "NHS ODS hospital locations",
+      "CQC care home register",
+      "FixMyStreet public report clustering data"
+    ]
+  }
+}

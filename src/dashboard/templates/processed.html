@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sorted — Processed Issues</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    /* ── Nav bar ─────────────────────────────────────────────────────── */
+    .nav-bar {
+      background: #fff;
+      border-bottom: 1px solid var(--grey-200);
+      padding: 0 2rem;
+      display: flex;
+      gap: 0;
+    }
+    .nav-bar a {
+      display: inline-block;
+      padding: .7rem 1.25rem;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--grey-600);
+      text-decoration: none;
+      border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .nav-bar a:hover { color: var(--navy); }
+    .nav-bar a.active {
+      color: var(--navy);
+      border-bottom-color: var(--navy);
+    }
+
+    /* ── Stats strip ─────────────────────────────────────────────────── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      padding: 1.25rem 2rem;
+    }
+    .stat-card {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      text-align: center;
+    }
+    .stat-card .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--navy);
+      line-height: 1.2;
+    }
+    .stat-card .label {
+      font-size: .78rem;
+      color: var(--grey-600);
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      margin-top: .25rem;
+    }
+
+    /* ── Issue list ───────────────────────────────────────────────────── */
+    .issue-list {
+      padding: 0 2rem 2rem;
+    }
+    .issue-card {
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0,0,0,.08);
+      margin-bottom: .75rem;
+      overflow: hidden;
+      transition: box-shadow .15s;
+    }
+    .issue-card:hover { box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+
+    .issue-summary {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .issue-summary:hover { background: var(--grey-50); }
+
+    .issue-title {
+      font-weight: 600;
+      font-size: .95rem;
+      color: var(--navy);
+      flex: 1;
+      min-width: 0;
+    }
+    .issue-title small {
+      display: block;
+      font-weight: 400;
+      font-size: .8rem;
+      color: var(--grey-600);
+      margin-top: .15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .severity-gauge {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      flex-shrink: 0;
+    }
+    .severity-gauge .bar {
+      display: flex;
+      gap: 2px;
+    }
+    .severity-gauge .bar span {
+      width: 6px;
+      height: 18px;
+      border-radius: 2px;
+      background: var(--grey-200);
+    }
+    .severity-gauge .bar span.filled { background: var(--grey-400); }
+    .severity-gauge .bar span.filled.green { background: var(--green); }
+    .severity-gauge .bar span.filled.amber { background: var(--amber); }
+    .severity-gauge .bar span.filled.red { background: var(--red); }
+    .severity-gauge .score {
+      font-weight: 700;
+      font-size: .85rem;
+      min-width: 28px;
+      text-align: right;
+    }
+
+    .issue-badges {
+      display: flex;
+      gap: .5rem;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .expand-icon {
+      font-size: 1.1rem;
+      color: var(--grey-400);
+      transition: transform .2s;
+      flex-shrink: 0;
+    }
+    .issue-card.open .expand-icon { transform: rotate(180deg); }
+
+    /* ── Expanded detail ──────────────────────────────────────────────── */
+    .issue-detail {
+      display: none;
+      border-top: 1px solid var(--grey-200);
+      padding: 1.25rem;
+    }
+    .issue-card.open .issue-detail { display: block; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+      margin-bottom: 1rem;
+    }
+    .detail-item {
+      border: 1px solid var(--grey-200);
+      border-radius: var(--radius);
+      padding: .7rem 1rem;
+    }
+    .detail-item .dlabel {
+      font-size: .72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      color: var(--grey-600);
+      margin-bottom: .15rem;
+    }
+    .detail-item .dvalue {
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .detail-section {
+      margin-top: 1rem;
+    }
+    .detail-section h4 {
+      font-size: .82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      color: var(--grey-600);
+      margin-bottom: .5rem;
+    }
+    .detail-text {
+      background: var(--grey-50);
+      border: 1px solid var(--grey-200);
+      border-radius: var(--radius);
+      padding: 1rem;
+      white-space: pre-wrap;
+      font-size: .88rem;
+      line-height: 1.6;
+      color: var(--grey-800);
+    }
+
+    .escalation-timeline {
+      border-left: 3px solid var(--amber);
+      padding-left: 1rem;
+      margin-top: .5rem;
+    }
+    .escalation-timeline .stage {
+      margin-bottom: .75rem;
+    }
+    .escalation-timeline .stage-label {
+      font-weight: 600;
+      font-size: .85rem;
+      color: var(--navy);
+    }
+    .escalation-timeline .stage-date {
+      font-size: .78rem;
+      color: var(--grey-600);
+    }
+
+    .process-btn {
+      display: inline-block;
+      background: var(--navy);
+      color: #fff;
+      padding: .55rem 1.25rem;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: .88rem;
+      transition: background .15s;
+    }
+    .process-btn:hover { background: var(--navy-light); }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--grey-600);
+    }
+    .empty-state h3 {
+      margin-bottom: .5rem;
+      color: var(--navy);
+    }
+
+    @media (max-width: 768px) {
+      .detail-grid { grid-template-columns: 1fr; }
+      .issue-summary { flex-wrap: wrap; }
+      .nav-bar { padding: 0 1rem; }
+      .stats-strip { padding: 1rem; }
+      .issue-list { padding: 0 1rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+  <span class="header-logo">S.</span>
+  <h1>Sorted &mdash; Processed Issues</h1>
+  <span class="header-right" id="issueCount"></span>
+</header>
+
+<!-- Nav -->
+<nav class="nav-bar" style="align-items:center;">
+  <a href="/">Dashboard</a>
+  <a href="/dashboard/categories">Categories</a>
+  <a href="/processed" class="active">Processed Issues</a>
+  <a href="/intake">Submit Issue</a>
+  <a href="/app" style="margin-left:auto;padding:.45rem .9rem;font-size:.82rem;font-weight:500;color:var(--grey-600);text-decoration:none;border:1px solid var(--grey-200);border-radius:6px;border-bottom-width:1px;">Open consumer app &rarr;</a>
+</nav>
+
+<!-- Stats strip -->
+<div class="stats-strip">
+  <div class="stat-card"><div class="value" id="statTotal">-</div><div class="label">Total Processed</div></div>
+  <div class="stat-card"><div class="value" id="statAvgSeverity">-</div><div class="label">Avg Severity</div></div>
+  <div class="stat-card"><div class="value" id="statEscalated">-</div><div class="label">Escalated</div></div>
+  <div class="stat-card"><div class="value" id="statCategories">-</div><div class="label">Categories</div></div>
+  <div class="stat-card"><div class="value" id="statCouncils">-</div><div class="label">Councils Routed</div></div>
+</div>
+
+<!-- Actions row -->
+<div style="padding: 0 2rem .75rem; display:flex; gap:.75rem; align-items:center;">
+  <a class="process-btn" href="/intake">Process New Issue</a>
+</div>
+
+<!-- Issue list -->
+<div class="issue-list" id="issueList">
+  <div class="loading"><div class="spinner"></div><br>Loading processed issues...</div>
+</div>
+
+<script>
+let issues = [];
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const resp = await fetch("/api/processed");
+    issues = await resp.json();
+  } catch (e) {
+    issues = [];
+  }
+  renderStats();
+  renderList();
+});
+
+function renderStats() {
+  const n = issues.length;
+  document.getElementById("statTotal").textContent = n;
+  document.getElementById("issueCount").textContent = n + " issues processed";
+
+  if (n === 0) {
+    document.getElementById("statAvgSeverity").textContent = "-";
+    document.getElementById("statEscalated").textContent = "0";
+    document.getElementById("statCategories").textContent = "0";
+    document.getElementById("statCouncils").textContent = "0";
+    return;
+  }
+
+  const avgSev = issues.reduce((s, i) => s + (i.severity_score || 0), 0) / n;
+  document.getElementById("statAvgSeverity").textContent = avgSev.toFixed(1) + "/10";
+
+  const escalated = issues.filter(i => i.escalation_stage && i.escalation_stage !== "none").length;
+  document.getElementById("statEscalated").textContent = escalated;
+
+  const cats = new Set(issues.map(i => i.category));
+  document.getElementById("statCategories").textContent = cats.size;
+
+  const councils = new Set(issues.filter(i => i.council).map(i => i.council));
+  document.getElementById("statCouncils").textContent = councils.size;
+}
+
+function renderList() {
+  const el = document.getElementById("issueList");
+
+  if (!issues.length) {
+    el.innerHTML = `<div class="empty-state">
+      <h3>No processed issues yet</h3>
+      <p>Run the demo pipeline or submit a new issue to get started.</p>
+      <br>
+      <a class="process-btn" href="/intake">Process New Issue</a>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = issues.map((issue, idx) => {
+    const sev = issue.severity_score || 0;
+    const sevColor = sev >= 8 ? "red" : sev >= 5 ? "amber" : "green";
+    const sevBadgeCls = sev >= 8 ? "badge-red" : sev >= 5 ? "badge-amber" : "badge-green";
+
+    // Severity gauge bars
+    let bars = "";
+    for (let i = 1; i <= 10; i++) {
+      bars += i <= sev
+        ? `<span class="filled ${sevColor}"></span>`
+        : `<span></span>`;
+    }
+
+    // Status badge
+    const status = issue.status || "new";
+    const statusCls = status === "escalated" ? "badge-red"
+                    : status === "submitted" ? "badge-green"
+                    : status === "routed" ? "badge-amber"
+                    : "badge-navy";
+
+    // Category badge
+    const cat = issue.category || "Uncategorised";
+
+    // Description preview
+    const desc = issue.description || "";
+    const preview = desc.length > 120 ? desc.substring(0, 120) + "..." : desc;
+
+    // Escalation info
+    let escalationHtml = "";
+    if (issue.escalation_history && issue.escalation_history.length > 0) {
+      escalationHtml = `<div class="detail-section">
+        <h4>Escalation History</h4>
+        <div class="escalation-timeline">
+          ${issue.escalation_history.map(e => `
+            <div class="stage">
+              <div class="stage-label">${esc((e.stage || "").replace(/_/g, " "))}</div>
+              <div class="stage-date">${esc(e.date || "")}</div>
+            </div>
+          `).join("")}
+        </div>
+      </div>`;
+    }
+
+    // Reported time
+    const reportedAt = issue.reported_at
+      ? new Date(issue.reported_at).toLocaleString()
+      : "N/A";
+
+    return `<div class="issue-card" id="card-${idx}">
+      <div class="issue-summary" onclick="toggleCard(${idx})">
+        <div class="issue-title">
+          ${esc(issue.title || "Untitled Issue")}
+          <small>${esc(preview)}</small>
+        </div>
+        <div class="issue-badges">
+          <span class="badge badge-navy">${esc(cat)}</span>
+          <span class="badge ${statusCls}">${esc(status)}</span>
+        </div>
+        <div class="severity-gauge">
+          <div class="bar">${bars}</div>
+          <span class="score" style="color:var(--${sevColor})">${sev}/10</span>
+        </div>
+        <span class="expand-icon">&#9660;</span>
+      </div>
+      <div class="issue-detail">
+        <div class="detail-grid">
+          <div class="detail-item"><div class="dlabel">Category</div><div class="dvalue">${esc(cat)}</div></div>
+          <div class="detail-item"><div class="dlabel">Subcategory</div><div class="dvalue">${esc(issue.subcategory || "N/A")}</div></div>
+          <div class="detail-item"><div class="dlabel">Severity</div><div class="dvalue" style="color:var(--${sevColor})">${sev}/10</div></div>
+          <div class="detail-item"><div class="dlabel">Status</div><div class="dvalue">${esc(status)}</div></div>
+          <div class="detail-item"><div class="dlabel">Council</div><div class="dvalue">${esc(issue.council || "N/A")}</div></div>
+          <div class="detail-item"><div class="dlabel">Department</div><div class="dvalue">${esc(issue.department || "N/A")}</div></div>
+          <div class="detail-item"><div class="dlabel">Borough</div><div class="dvalue">${esc(issue.borough || "N/A")}</div></div>
+          <div class="detail-item"><div class="dlabel">Reported</div><div class="dvalue">${esc(reportedAt)}</div></div>
+          ${issue.escalation_stage && issue.escalation_stage !== "none"
+            ? `<div class="detail-item"><div class="dlabel">Escalation Stage</div><div class="dvalue" style="color:var(--red)">${esc(issue.escalation_stage.replace(/_/g, " "))}</div></div>`
+            : ""}
+          ${issue.days_open
+            ? `<div class="detail-item"><div class="dlabel">Days Open</div><div class="dvalue">${issue.days_open}</div></div>`
+            : ""}
+        </div>
+
+        <div class="detail-section">
+          <h4>Severity Justification</h4>
+          <div class="detail-text">${esc(issue.severity_justification || "N/A")}</div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Full Description</h4>
+          <div class="detail-text">${esc(issue.description || "N/A")}</div>
+        </div>
+
+        <div class="detail-section">
+          <h4>Formal Submission</h4>
+          <div class="detail-text">${esc(issue.submission_text || "N/A")}</div>
+        </div>
+
+        ${escalationHtml}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function toggleCard(idx) {
+  document.getElementById("card-" + idx).classList.toggle("open");
+}
+
+function esc(s) {
+  if (!s) return "";
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>

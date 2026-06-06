@@ -1,0 +1,43 @@
+{
+  "_source": "Population: ONS Census 2021. Area: data.london.gov.uk borough profiles. Adoption: research notes from docs/research-log.md (FixMyStreet Pro deployments verified 2026-06).",
+  "_adoption_legend": {
+    "fms_pro": "FixMyStreet Pro — direct CRM integration, our data is well-covered",
+    "fms_public": "Public FixMyStreet — reports arrive as email, partial coverage",
+    "direct_only": "No FixMyStreet adoption — under-represented in our data"
+  },
+  "boroughs": {
+    "Barking and Dagenham": {"population": 218869, "area_km2": 36.1, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Barnet":               {"population": 389344, "area_km2": 86.7, "adoption": "fms_pro",    "cohort": "outer_suburban"},
+    "Bexley":               {"population": 246036, "area_km2": 60.6, "adoption": "fms_pro",    "cohort": "outer_suburban"},
+    "Brent":                {"population": 339791, "area_km2": 43.2, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Bromley":              {"population": 332336, "area_km2": 150.1,"adoption": "fms_pro",    "cohort": "outer_suburban"},
+    "Camden":               {"population": 210136, "area_km2": 21.8, "adoption": "fms_pro",    "cohort": "inner_high_volume"},
+    "City of London Corporation": {"population": 8583, "area_km2": 2.9, "adoption": "direct_only", "cohort": "inner_low_volume"},
+    "Croydon":              {"population": 390719, "area_km2": 86.5, "adoption": "fms_public", "cohort": "outer_suburban"},
+    "Ealing":               {"population": 367153, "area_km2": 55.5, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Enfield":              {"population": 333794, "area_km2": 80.8, "adoption": "fms_public", "cohort": "outer_suburban"},
+    "Greenwich":            {"population": 289224, "area_km2": 47.4, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Hackney":              {"population": 259080, "area_km2": 19.1, "adoption": "fms_pro",    "cohort": "inner_high_volume"},
+    "Hammersmith and Fulham": {"population": 183245, "area_km2": 16.4, "adoption": "fms_public", "cohort": "inner_low_volume"},
+    "Haringey":             {"population": 264121, "area_km2": 29.6, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Harrow":               {"population": 261347, "area_km2": 50.5, "adoption": "fms_public", "cohort": "outer_suburban"},
+    "Havering":             {"population": 262053, "area_km2": 112.3,"adoption": "direct_only", "cohort": "outer_suburban"},
+    "Hillingdon":           {"population": 305955, "area_km2": 115.7,"adoption": "fms_public", "cohort": "outer_suburban"},
+    "Hounslow":             {"population": 288204, "area_km2": 56.0, "adoption": "fms_pro",    "cohort": "outer_urban"},
+    "Islington":            {"population": 216938, "area_km2": 14.9, "adoption": "fms_pro",    "cohort": "inner_high_volume"},
+    "Kensington and Chelsea":{"population": 143400, "area_km2": 12.1, "adoption": "direct_only", "cohort": "inner_low_volume"},
+    "Kingston upon Thames": {"population": 168054, "area_km2": 37.2, "adoption": "fms_public", "cohort": "outer_suburban"},
+    "Lambeth":              {"population": 317190, "area_km2": 26.8, "adoption": "fms_public", "cohort": "inner_high_volume"},
+    "Lewisham":             {"population": 300379, "area_km2": 35.1, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Merton":               {"population": 215221, "area_km2": 37.6, "adoption": "fms_pro",    "cohort": "outer_suburban"},
+    "Newham":               {"population": 351038, "area_km2": 36.2, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Redbridge":            {"population": 308876, "area_km2": 56.4, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Richmond upon Thames": {"population": 195396, "area_km2": 57.4, "adoption": "fms_public", "cohort": "outer_suburban"},
+    "Southwark":            {"population": 307746, "area_km2": 28.9, "adoption": "fms_pro",    "cohort": "inner_high_volume"},
+    "Sutton":               {"population": 209627, "area_km2": 43.9, "adoption": "fms_public", "cohort": "outer_suburban"},
+    "Tower Hamlets":        {"population": 310301, "area_km2": 20.0, "adoption": "direct_only", "cohort": "inner_high_volume"},
+    "Waltham Forest":       {"population": 278482, "area_km2": 38.8, "adoption": "fms_public", "cohort": "outer_urban"},
+    "Wandsworth":           {"population": 327506, "area_km2": 34.3, "adoption": "fms_public", "cohort": "inner_high_volume"},
+    "Westminster":          {"population": 204286, "area_km2": 21.5, "adoption": "fms_pro",    "cohort": "inner_high_volume"}
+  }
+}

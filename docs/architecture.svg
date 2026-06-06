@@ -1,0 +1,180 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:gn="http://www.goodnotes.com/gn-svg" width="1400" height="1100" viewBox="0 0 1400 1100">
+
+  <!-- Title -->
+  <text x="700" y="40" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="28" font-weight="bold" fill="#1a1a2e">London Civic Agent — System Architecture</text>
+  <text x="700" y="62" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#888888">NVIDIA Hack for Impact London | 5–7 June 2026</text>
+
+  <!-- DGX SPARK BOUNDARY -->
+  <rect x="310" y="160" width="520" height="820" rx="16" ry="16" fill="none" stroke="#76b900" stroke-width="3" stroke-dasharray="12,6"/>
+  <rect x="380" y="148" width="280" height="26" rx="6" ry="6" fill="#76b900"/>
+  <text x="520" y="165" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" font-weight="bold" fill="#ffffff">DGX SPARK — LOCAL INFERENCE (GB10)</text>
+
+  <!-- USER INPUT -->
+  <rect x="460" y="85" width="220" height="56" rx="28" ry="28" fill="#6C63FF" stroke="#5A54D4" stroke-width="2"/>
+  <text x="530" y="112" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#ffffff" font-weight="bold">Photo</text>
+  <text x="530" y="128" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#d4d2ff">+ GPS EXIF</text>
+  <text x="620" y="112" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#ffffff" font-weight="bold">Voice</text>
+  <text x="620" y="128" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#d4d2ff">+ 99 langs</text>
+  <circle cx="440" cy="108" r="12" fill="#ffffff" stroke="#5A54D4" stroke-width="1.5"/>
+  <text x="440" y="113" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#5A54D4">U</text>
+
+  <line x1="570" y1="141" x2="570" y2="185" stroke="#6C63FF" stroke-width="2" marker-end="url(#arrowPurple)"/>
+
+  <!-- Agent 1: Intake -->
+  <rect x="420" y="190" width="300" height="70" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="440" y="214" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#2E7D32">1. Intake Agent</text>
+  <text x="440" y="232" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">Qwen2.5-VL-7B (vision) + Scribe (STT)</text>
+  <text x="440" y="248" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#999999">Classifies issue, extracts GPS, structures report</text>
+  <rect x="660" y="194" width="30" height="18" rx="4" ry="4" fill="#4CAF50"/>
+  <text x="675" y="207" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">P0</text>
+
+  <line x1="570" y1="260" x2="570" y2="290" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+  <!-- Agent 2: Severity Ranking -->
+  <rect x="420" y="295" width="300" height="70" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="440" y="319" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#2E7D32">2. Severity Ranking Agent</text>
+  <text x="440" y="337" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">Llama 3.3 70B + RAG over London data</text>
+  <text x="440" y="353" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#999999">Scores impact using cited open datasets</text>
+  <rect x="660" y="299" width="30" height="18" rx="4" ry="4" fill="#4CAF50"/>
+  <text x="675" y="312" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">P0</text>
+
+  <line x1="570" y1="365" x2="570" y2="395" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+  <!-- Agent 3: Routing -->
+  <rect x="420" y="400" width="300" height="70" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="440" y="424" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#2E7D32">3. Routing Agent</text>
+  <text x="440" y="442" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">Llama 3.3 70B + tool calling</text>
+  <text x="440" y="458" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#999999">Identifies correct council &amp; department</text>
+  <rect x="660" y="404" width="30" height="18" rx="4" ry="4" fill="#4CAF50"/>
+  <text x="675" y="417" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">P0</text>
+
+  <line x1="570" y1="470" x2="570" y2="500" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+  <!-- Agent 4: Submission -->
+  <rect x="420" y="505" width="300" height="70" rx="10" ry="10" fill="#E8F5E9" stroke="#4CAF50" stroke-width="2"/>
+  <text x="440" y="529" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#2E7D32">4. Submission Agent</text>
+  <text x="440" y="547" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">Llama 3.3 70B + council APIs</text>
+  <text x="440" y="563" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#999999">Files report via API, email, or portal</text>
+  <rect x="660" y="509" width="30" height="18" rx="4" ry="4" fill="#4CAF50"/>
+  <text x="675" y="522" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">P0</text>
+
+  <line x1="570" y1="575" x2="570" y2="605" stroke="#4CAF50" stroke-width="2" marker-end="url(#arrowGreen)"/>
+
+  <!-- CRM Hub -->
+  <rect x="440" y="610" width="260" height="55" rx="10" ry="10" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+  <text x="570" y="635" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#E65100">CRM / State Machine</text>
+  <text x="570" y="653" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">SQLite — tracks all cases &amp; SLAs</text>
+
+  <line x1="570" y1="665" x2="570" y2="700" stroke="#FF9800" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrowOrange)"/>
+  <text x="585" y="688" font-family="Helvetica, Arial, sans-serif" font-size="9" fill="#FF9800" font-style="italic">SLA breached</text>
+
+  <!-- Agent 5: Phone Escalation -->
+  <rect x="420" y="705" width="300" height="70" rx="10" ry="10" fill="#E3F2FD" stroke="#1976D2" stroke-width="2"/>
+  <text x="440" y="729" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#1565C0">5. Phone Escalation Agent</text>
+  <text x="440" y="747" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">ElevenLabs Conversational AI + Twilio</text>
+  <text x="440" y="763" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#999999">Calls council, navigates IVR, logs outcome</text>
+  <rect x="660" y="709" width="30" height="18" rx="4" ry="4" fill="#1976D2"/>
+  <text x="675" y="722" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">P1</text>
+
+  <line x1="570" y1="775" x2="570" y2="810" stroke="#1976D2" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#arrowBlue)"/>
+  <text x="585" y="798" font-family="Helvetica, Arial, sans-serif" font-size="9" fill="#1976D2" font-style="italic">still unresolved</text>
+
+  <!-- Agent 6: Further Escalation -->
+  <rect x="420" y="815" width="300" height="70" rx="10" ry="10" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2"/>
+  <text x="440" y="839" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#7B1FA2">6. Further Escalation Agent</text>
+  <text x="440" y="857" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">Llama 3.3 70B — drafts formal complaints</text>
+  <text x="440" y="873" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#999999">LGO / Councillor / MP</text>
+  <rect x="660" y="819" width="30" height="18" rx="4" ry="4" fill="#9C27B0"/>
+  <text x="675" y="832" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">P3</text>
+
+  <!-- NeMo labels -->
+  <rect x="340" y="925" width="200" height="24" rx="6" ry="6" fill="#76b900" opacity="0.15" stroke="#76b900" stroke-width="1"/>
+  <text x="440" y="942" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" fill="#76b900">NeMo Agent Toolkit v1.7</text>
+  <rect x="560" y="925" width="160" height="24" rx="6" ry="6" fill="#76b900" opacity="0.15" stroke="#76b900" stroke-width="1"/>
+  <text x="640" y="942" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="10" font-weight="bold" fill="#76b900">NeMo Guardrails</text>
+
+  <!-- DATA SOURCES -->
+  <rect x="30" y="230" width="260" height="370" rx="12" ry="12" fill="#FAFAFA" stroke="#BDBDBD" stroke-width="1.5"/>
+  <text x="160" y="258" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#424242">Data Sources (RAG Corpus)</text>
+  <rect x="50" y="275" width="220" height="28" rx="6" ry="6" fill="#E8EAF6" stroke="#5C6BC0" stroke-width="1"/>
+  <text x="160" y="294" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#303F9F">London Datastore</text>
+  <rect x="50" y="311" width="220" height="28" rx="6" ry="6" fill="#E8EAF6" stroke="#5C6BC0" stroke-width="1"/>
+  <text x="160" y="330" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#303F9F">TfL Unified API</text>
+  <rect x="50" y="347" width="220" height="28" rx="6" ry="6" fill="#E8EAF6" stroke="#5C6BC0" stroke-width="1"/>
+  <text x="160" y="366" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#303F9F">DfT Traffic Volume (AADF)</text>
+  <rect x="50" y="383" width="220" height="28" rx="6" ry="6" fill="#E8EAF6" stroke="#5C6BC0" stroke-width="1"/>
+  <text x="160" y="402" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#303F9F">STATS19 Collision History</text>
+  <rect x="50" y="419" width="220" height="28" rx="6" ry="6" fill="#E8EAF6" stroke="#5C6BC0" stroke-width="1"/>
+  <text x="160" y="438" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#303F9F">Census 2021 (LSOA density)</text>
+  <rect x="50" y="455" width="220" height="28" rx="6" ry="6" fill="#E8EAF6" stroke="#5C6BC0" stroke-width="1"/>
+  <text x="160" y="474" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#303F9F">Schools / Hospitals / Care Homes</text>
+  <rect x="50" y="491" width="220" height="28" rx="6" ry="6" fill="#E8EAF6" stroke="#5C6BC0" stroke-width="1"/>
+  <text x="160" y="510" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#303F9F">TfL Station Entry/Exit (footfall)</text>
+  <rect x="50" y="527" width="220" height="28" rx="6" ry="6" fill="#FCE4EC" stroke="#E91E63" stroke-width="1"/>
+  <text x="160" y="546" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#C2185B">FixMyStreet (scraped)</text>
+
+  <line x1="290" y1="330" x2="420" y2="330" stroke="#5C6BC0" stroke-width="2" marker-end="url(#arrowIndigo)"/>
+
+  <!-- EXTERNAL SERVICES -->
+  <rect x="860" y="190" width="260" height="260" rx="12" ry="12" fill="#FAFAFA" stroke="#BDBDBD" stroke-width="1.5"/>
+  <text x="990" y="218" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" font-weight="bold" fill="#424242">External Services</text>
+  <rect x="880" y="235" width="220" height="28" rx="6" ry="6" fill="#EDE7F6" stroke="#7E57C2" stroke-width="1"/>
+  <text x="990" y="254" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#512DA8">ElevenLabs Scribe (STT)</text>
+  <rect x="880" y="271" width="220" height="28" rx="6" ry="6" fill="#EDE7F6" stroke="#7E57C2" stroke-width="1"/>
+  <text x="990" y="290" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#512DA8">ElevenLabs Conv. AI (calls)</text>
+  <rect x="880" y="307" width="220" height="28" rx="6" ry="6" fill="#EDE7F6" stroke="#7E57C2" stroke-width="1"/>
+  <text x="990" y="326" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#512DA8">Twilio (telephony)</text>
+  <rect x="880" y="343" width="220" height="28" rx="6" ry="6" fill="#EDE7F6" stroke="#7E57C2" stroke-width="1"/>
+  <text x="990" y="362" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#512DA8">Council APIs / Portals</text>
+  <rect x="880" y="379" width="220" height="28" rx="6" ry="6" fill="#EDE7F6" stroke="#7E57C2" stroke-width="1"/>
+  <text x="990" y="398" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#512DA8">Council Email Endpoints</text>
+
+  <line x1="860" y1="249" x2="720" y2="220" stroke="#7E57C2" stroke-width="2" marker-end="url(#arrowPurpleDark)"/>
+  <line x1="860" y1="362" x2="720" y2="540" stroke="#7E57C2" stroke-width="2" marker-end="url(#arrowPurpleDark)"/>
+  <line x1="860" y1="321" x2="720" y2="740" stroke="#7E57C2" stroke-width="2" marker-end="url(#arrowPurpleDark)"/>
+
+  <!-- PUBLIC DASHBOARD -->
+  <rect x="860" y="560" width="310" height="130" rx="12" ry="12" fill="#FFF8E1" stroke="#FFC107" stroke-width="2"/>
+  <text x="1015" y="590" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="15" font-weight="bold" fill="#F57F17">Public Dashboard</text>
+  <text x="1015" y="612" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#555555">Council Leaderboard</text>
+  <rect x="905" y="624" width="30" height="18" rx="4" ry="4" fill="#1976D2"/>
+  <text x="920" y="637" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">P1</text>
+  <text x="885" y="657" font-family="Courier, monospace" font-size="10" fill="#666666">1. Camden ........ 87% resolved</text>
+  <text x="885" y="672" font-family="Courier, monospace" font-size="10" fill="#666666">2. Islington ..... 73% resolved</text>
+  <text x="885" y="687" font-family="Courier, monospace" font-size="10" fill="#999999">3. Hackney ....... 41% resolved</text>
+
+  <line x1="700" y1="637" x2="860" y2="625" stroke="#FFC107" stroke-width="2" marker-end="url(#arrowYellow)"/>
+  <text x="775" y="620" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" fill="#F57F17">case data</text>
+
+  <line x1="270" y1="555" x2="270" y2="1020" stroke="#E91E63" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="270" y1="1020" x2="1015" y2="1020" stroke="#E91E63" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <line x1="1015" y1="1020" x2="1015" y2="695" stroke="#E91E63" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrowPink)"/>
+  <text x="640" y="1012" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="9" fill="#E91E63">scraped FixMyStreet data feeds dashboard</text>
+
+  <!-- LEGEND -->
+  <rect x="860" y="780" width="310" height="160" rx="10" ry="10" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="1"/>
+  <text x="880" y="805" font-family="Helvetica, Arial, sans-serif" font-size="13" font-weight="bold" fill="#424242">Legend</text>
+  <rect x="880" y="818" width="14" height="14" rx="3" ry="3" fill="#E8F5E9" stroke="#4CAF50" stroke-width="1.5"/>
+  <text x="902" y="830" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">P0 — Core pipeline agents</text>
+  <rect x="880" y="842" width="14" height="14" rx="3" ry="3" fill="#E3F2FD" stroke="#1976D2" stroke-width="1.5"/>
+  <text x="902" y="854" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">P1 — Demo wow-factor</text>
+  <rect x="880" y="866" width="14" height="14" rx="3" ry="3" fill="#F3E5F5" stroke="#9C27B0" stroke-width="1.5"/>
+  <text x="902" y="878" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">P3 — Cut if behind schedule</text>
+  <rect x="880" y="890" width="14" height="14" rx="3" ry="3" fill="#FFF3E0" stroke="#FF9800" stroke-width="1.5"/>
+  <text x="902" y="902" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">CRM / State machine</text>
+  <line x1="880" y1="921" x2="894" y2="921" stroke="#76b900" stroke-width="3" stroke-dasharray="6,3"/>
+  <text x="902" y="925" font-family="Helvetica, Arial, sans-serif" font-size="11" fill="#555555">DGX Spark boundary (local)</text>
+
+  <!-- ARROW MARKERS -->
+  <defs>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#4CAF50"/></marker>
+    <marker id="arrowPurple" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#6C63FF"/></marker>
+    <marker id="arrowOrange" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#FF9800"/></marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#1976D2"/></marker>
+    <marker id="arrowIndigo" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5C6BC0"/></marker>
+    <marker id="arrowPurpleDark" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7E57C2"/></marker>
+    <marker id="arrowYellow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#FFC107"/></marker>
+    <marker id="arrowPink" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#E91E63"/></marker>
+  </defs>
+
+</svg>

@@ -1,0 +1,668 @@
+[
+  {
+    "id": 172,
+    "name": "Ms Diane Abbott",
+    "party": "Independent",
+    "constituency": "Hackney North and Stoke Newington",
+    "email": "diane.abbott.office@parliament.uk",
+    "twitter": "https://twitter.com/HackneyAbbott",
+    "profile_url": "https://members.parliament.uk/member/172"
+  },
+  {
+    "id": 4138,
+    "name": "Rushanara Ali",
+    "party": "Labour",
+    "constituency": "Bethnal Green and Stepney",
+    "email": "rushanara.ali.mp@parliament.uk",
+    "twitter": "https://twitter.com/rushanaraali",
+    "profile_url": "https://members.parliament.uk/member/4138"
+  },
+  {
+    "id": 4573,
+    "name": "Dr Rosena Allin-Khan",
+    "party": "Labour",
+    "constituency": "Tooting",
+    "email": "rosena.allinkhan.mp@parliament.uk",
+    "twitter": "https://twitter.com/DrRosena",
+    "profile_url": "https://members.parliament.uk/member/4573"
+  },
+  {
+    "id": 4788,
+    "name": "Fleur Anderson",
+    "party": "Labour",
+    "constituency": "Putney",
+    "email": "fleur.anderson.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/4788"
+  },
+  {
+    "id": 5211,
+    "name": "James Asser",
+    "party": "Labour",
+    "constituency": "West Ham and Beckton",
+    "email": "james.asser.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/5211"
+  },
+  {
+    "id": 5227,
+    "name": "Jas Athwal",
+    "party": "Labour",
+    "constituency": "Ilford South",
+    "email": "jas.athwal.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/5227"
+  },
+  {
+    "id": 4798,
+    "name": "Gareth Bacon",
+    "party": "Conservative",
+    "constituency": "Orpington",
+    "email": "gareth.bacon.mp@parliament.uk",
+    "twitter": "https://twitter.com/garethbaconmp",
+    "profile_url": "https://members.parliament.uk/member/4798"
+  },
+  {
+    "id": 5054,
+    "name": "Mr Calvin Bailey",
+    "party": "Labour",
+    "constituency": "Leyton and Wanstead",
+    "email": "calvin.bailey.mp@parliament.uk",
+    "twitter": "https://x.com/CalvinBailey",
+    "profile_url": "https://members.parliament.uk/member/5054"
+  },
+  {
+    "id": 5339,
+    "name": "Danny Beales",
+    "party": "Labour",
+    "constituency": "Uxbridge and South Ruislip",
+    "email": "danny.beales.mp@parliament.uk",
+    "twitter": "https://x.com/DannyBeales",
+    "profile_url": "https://members.parliament.uk/member/5339"
+  },
+  {
+    "id": 4005,
+    "name": "Bob Blackman",
+    "party": "Conservative",
+    "constituency": "Harrow East",
+    "email": "bob.blackman.mp@parliament.uk",
+    "twitter": "https://twitter.com/BobBlackman",
+    "profile_url": "https://members.parliament.uk/member/4005"
+  },
+  {
+    "id": 5257,
+    "name": "Rachel Blake",
+    "party": "Labour (Co-op)",
+    "constituency": "Cities of London and Westminster",
+    "email": "rachel.blake.mp@parliament.uk",
+    "twitter": "https://x.com/RNBlake",
+    "profile_url": "https://members.parliament.uk/member/5257"
+  },
+  {
+    "id": 1489,
+    "name": "Dawn Butler",
+    "party": "Labour",
+    "constituency": "Brent East",
+    "email": "dawn.butler.mp@parliament.uk",
+    "twitter": "https://twitter.com/dawnbutlerbrent",
+    "profile_url": "https://members.parliament.uk/member/1489"
+  },
+  {
+    "id": 4389,
+    "name": "Ruth Cadbury",
+    "party": "Labour",
+    "constituency": "Brentford and Isleworth",
+    "email": "ruthcadburymp@parliament.uk",
+    "twitter": "https://twitter.com/ruthcadbury",
+    "profile_url": "https://members.parliament.uk/member/4389"
+  },
+  {
+    "id": 5180,
+    "name": "Nesil Caliskan",
+    "party": "Labour",
+    "constituency": "Barking",
+    "email": "nesil.caliskan.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/5180"
+  },
+  {
+    "id": 4610,
+    "name": "Bambos Charalambous",
+    "party": "Labour",
+    "constituency": "Southgate and Wood Green",
+    "email": "bambos.charalambous.mp@parliament.uk",
+    "twitter": "https://x.com/BambosMP",
+    "profile_url": "https://members.parliament.uk/member/4610"
+  },
+  {
+    "id": 4822,
+    "name": "Feryal Clark",
+    "party": "Labour",
+    "constituency": "Enfield North",
+    "email": "feryal.clark.mp@parliament.uk",
+    "twitter": "https://twitter.com/FeryalClark",
+    "profile_url": "https://members.parliament.uk/member/4822"
+  },
+  {
+    "id": 5344,
+    "name": "Ben Coleman",
+    "party": "Labour",
+    "constituency": "Chelsea and Fulham",
+    "email": "ben.coleman.mp@parliament.uk",
+    "twitter": "https://x.com/ChelFulhamBen",
+    "profile_url": "https://members.parliament.uk/member/5344"
+  },
+  {
+    "id": 5132,
+    "name": "Liam Conlon",
+    "party": "Labour",
+    "constituency": "Beckenham and Penge",
+    "email": "liam.conlon.mp@parliament.uk",
+    "twitter": "https://x.com/LiamConlon2",
+    "profile_url": "https://members.parliament.uk/member/5132"
+  },
+  {
+    "id": 185,
+    "name": "Jeremy Corbyn",
+    "party": "Independent",
+    "constituency": "Islington North",
+    "email": "jeremy.corbyn.mp@parliament.uk",
+    "twitter": "https://twitter.com/jeremycorbyn",
+    "profile_url": "https://members.parliament.uk/member/185"
+  },
+  {
+    "id": 5075,
+    "name": "Deirdre Costigan",
+    "party": "Labour",
+    "constituency": "Ealing Southall",
+    "email": "deirdre.costigan.mp@parliament.uk",
+    "twitter": "https://x.com/deirdrecostigan",
+    "profile_url": "https://members.parliament.uk/member/5075"
+  },
+  {
+    "id": 4368,
+    "name": "Neil Coyle",
+    "party": "Labour",
+    "constituency": "Bermondsey and Old Southwark",
+    "email": "neil.coyle.mp@parliament.uk",
+    "twitter": "https://twitter.com/coyleneil",
+    "profile_url": "https://members.parliament.uk/member/4368"
+  },
+  {
+    "id": 4088,
+    "name": "Ms Stella Creasy",
+    "party": "Labour (Co-op)",
+    "constituency": "Walthamstow",
+    "email": "stella.creasy.mp@parliament.uk",
+    "twitter": "https://twitter.com/stellacreasy",
+    "profile_url": "https://members.parliament.uk/member/4088"
+  },
+  {
+    "id": 4698,
+    "name": "Janet Daby",
+    "party": "Labour",
+    "constituency": "Lewisham East",
+    "email": "janet.daby.mp@parliament.uk",
+    "twitter": "https://twitter.com/JanetDaby",
+    "profile_url": "https://members.parliament.uk/member/4698"
+  },
+  {
+    "id": 188,
+    "name": "Ed Davey",
+    "party": "Liberal Democrat",
+    "constituency": "Kingston and Surbiton",
+    "email": "edward.davey.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/188"
+  },
+  {
+    "id": 4676,
+    "name": "Marsha De Cordova",
+    "party": "Labour",
+    "constituency": "Battersea",
+    "email": "marsha.decordova.mp@parliament.uk",
+    "twitter": "https://twitter.com/Marshadecordova",
+    "profile_url": "https://members.parliament.uk/member/4676"
+  },
+  {
+    "id": 5083,
+    "name": "Bobby Dean",
+    "party": "Liberal Democrat",
+    "constituency": "Carshalton and Wallington",
+    "email": "bobby.dean.mp@parliament.uk",
+    "twitter": "https://x.com/Bobby_Dean",
+    "profile_url": "https://members.parliament.uk/member/5083"
+  },
+  {
+    "id": 152,
+    "name": "Sir Iain Duncan Smith",
+    "party": "Conservative",
+    "constituency": "Chingford and Woodford Green",
+    "email": "Iain.duncansmith.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/152"
+  },
+  {
+    "id": 165,
+    "name": "Clive Efford",
+    "party": "Labour",
+    "constituency": "Eltham and Chislehurst",
+    "email": "clive.efford.mp@parliament.uk",
+    "twitter": "https://twitter.com/CliveEfford",
+    "profile_url": "https://members.parliament.uk/member/165"
+  },
+  {
+    "id": 4870,
+    "name": "Florence Eshalomi",
+    "party": "Labour (Co-op)",
+    "constituency": "Vauxhall and Camberwell Green",
+    "email": "florence.eshalomi.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/4870"
+  },
+  {
+    "id": 5099,
+    "name": "Miatta Fahnbulleh",
+    "party": "Labour (Co-op)",
+    "constituency": "Peckham",
+    "email": "miatta.fahnbulleh.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/5099"
+  },
+  {
+    "id": 5209,
+    "name": "Peter Fortune",
+    "party": "Conservative",
+    "constituency": "Bromley and Biggin Hill",
+    "email": "peter.fortune.mp@parliament.uk",
+    "twitter": "https://x.com/petertfortune",
+    "profile_url": "https://members.parliament.uk/member/5209"
+  },
+  {
+    "id": 4491,
+    "name": "Vicky Foxcroft",
+    "party": "Labour",
+    "constituency": "Lewisham North",
+    "email": "vicky.foxcroft.mp@parliament.uk",
+    "twitter": "https://twitter.com/vickyfoxcroft",
+    "profile_url": "https://members.parliament.uk/member/4491"
+  },
+  {
+    "id": 5184,
+    "name": "Daniel Francis",
+    "party": "Labour",
+    "constituency": "Bexleyheath and Crayford",
+    "email": "daniel.francis.mp@parliament.uk",
+    "twitter": "https://x.com/danfrancis02",
+    "profile_url": "https://members.parliament.uk/member/5184"
+  },
+  {
+    "id": 4932,
+    "name": "Mr Louie French",
+    "party": "Conservative",
+    "constituency": "Old Bexley and Sidcup",
+    "email": "louie.french.mp@parliament.uk",
+    "twitter": "https://twitter.com/louie_french",
+    "profile_url": "https://members.parliament.uk/member/4932"
+  },
+  {
+    "id": 146,
+    "name": "Barry Gardiner",
+    "party": "Labour",
+    "constituency": "Brent West",
+    "email": "barry.gardiner.mp@parliament.uk",
+    "twitter": "https://twitter.com/BarryGardiner",
+    "profile_url": "https://members.parliament.uk/member/146"
+  },
+  {
+    "id": 5305,
+    "name": "Georgia Gould",
+    "party": "Labour",
+    "constituency": "Queen's Park and Maida Vale",
+    "email": "georgia.gould.mp@parliament.uk",
+    "twitter": "https://x.com/georgia_gould",
+    "profile_url": "https://members.parliament.uk/member/5305"
+  },
+  {
+    "id": 4510,
+    "name": "Helen Hayes",
+    "party": "Labour",
+    "constituency": "Dulwich and West Norwood",
+    "email": "helen.hayes.mp@parliament.uk",
+    "twitter": "https://twitter.com/helenhayes_",
+    "profile_url": "https://members.parliament.uk/member/4510"
+  },
+  {
+    "id": 1524,
+    "name": "Dame Meg Hillier",
+    "party": "Labour (Co-op)",
+    "constituency": "Hackney South and Shoreditch",
+    "email": "meg.hillier.mp@parliament.uk",
+    "twitter": "https://twitter.com/Meg_HillierMP",
+    "profile_url": "https://members.parliament.uk/member/1524"
+  },
+  {
+    "id": 4511,
+    "name": "Dr Rupa Huq",
+    "party": "Labour",
+    "constituency": "Ealing Central and Acton",
+    "email": "rupa.huq.mp@parliament.uk",
+    "twitter": "https://twitter.com/rupahuq",
+    "profile_url": "https://members.parliament.uk/member/4511"
+  },
+  {
+    "id": 5119,
+    "name": "Natasha Irons",
+    "party": "Labour",
+    "constituency": "Croydon East",
+    "email": "natasha.irons.mp@parliament.uk",
+    "twitter": "https://x.com/NDIronsMP",
+    "profile_url": "https://members.parliament.uk/member/5119"
+  },
+  {
+    "id": 4631,
+    "name": "Sarah Jones",
+    "party": "Labour",
+    "constituency": "Croydon West",
+    "email": "sarah.jones.mp@parliament.uk",
+    "twitter": "https://twitter.com/LabourSJ",
+    "profile_url": "https://members.parliament.uk/member/4631"
+  },
+  {
+    "id": 5321,
+    "name": "Mr Paul Kohler",
+    "party": "Liberal Democrat",
+    "constituency": "Wimbledon",
+    "email": "paul.kohler.mp@parliament.uk",
+    "twitter": "https://x.com/PaulKohlerSW19",
+    "profile_url": "https://members.parliament.uk/member/5321"
+  },
+  {
+    "id": 5278,
+    "name": "Uma Kumaran",
+    "party": "Labour",
+    "constituency": "Stratford and Bow",
+    "email": "uma.kumaran.mp@parliament.uk",
+    "twitter": "https://twitter.com/uma_kumaran",
+    "profile_url": "https://members.parliament.uk/member/5278"
+  },
+  {
+    "id": 206,
+    "name": "Mr David Lammy",
+    "party": "Labour",
+    "constituency": "Tottenham",
+    "email": "david.lammy.mp@parliament.uk ",
+    "twitter": "https://twitter.com/DavidLammy",
+    "profile_url": "https://members.parliament.uk/member/206"
+  },
+  {
+    "id": 4647,
+    "name": "Julia Lopez",
+    "party": "Conservative",
+    "constituency": "Hornchurch and Upminster",
+    "email": "julia.lopez.mp@parliament.uk",
+    "twitter": "https://twitter.com/JuliaLopezMP",
+    "profile_url": "https://members.parliament.uk/member/4647"
+  },
+  {
+    "id": 4253,
+    "name": "Seema Malhotra",
+    "party": "Labour (Co-op)",
+    "constituency": "Feltham and Heston",
+    "email": "seema.malhotra.mp@parliament.uk",
+    "twitter": "https://twitter.com/SeemaMalhotra1",
+    "profile_url": "https://members.parliament.uk/member/4253"
+  },
+  {
+    "id": 193,
+    "name": "Dame Siobhain McDonagh",
+    "party": "Labour",
+    "constituency": "Mitcham and Morden",
+    "email": "mcdonaghs@parliament.uk",
+    "twitter": "https://x.com/siobhain_mc",
+    "profile_url": "https://members.parliament.uk/member/193"
+  },
+  {
+    "id": 178,
+    "name": "John McDonnell",
+    "party": "Labour",
+    "constituency": "Hayes and Harlington",
+    "email": "mcdonnellj@parliament.uk",
+    "twitter": "https://twitter.com/johnmcdonnellMP",
+    "profile_url": "https://members.parliament.uk/member/178"
+  },
+  {
+    "id": 5272,
+    "name": "Margaret Mullane",
+    "party": "Labour",
+    "constituency": "Dagenham and Rainham",
+    "email": "margaret.mullane.mp@parliament.uk",
+    "twitter": "https://x.com/margaret4dr",
+    "profile_url": "https://members.parliament.uk/member/5272"
+  },
+  {
+    "id": 4797,
+    "name": "James Murray",
+    "party": "Labour (Co-op)",
+    "constituency": "Ealing North",
+    "email": "james.murray.mp@parliament.uk",
+    "twitter": "https://twitter.com/jamesmurray_ldn",
+    "profile_url": "https://members.parliament.uk/member/4797"
+  },
+  {
+    "id": 4591,
+    "name": "Sarah Olney",
+    "party": "Liberal Democrat",
+    "constituency": "Richmond Park",
+    "email": "sarah.olney.mp@parliament.uk",
+    "twitter": "https://twitter.com/sarahjolney1",
+    "profile_url": "https://members.parliament.uk/member/4591"
+  },
+  {
+    "id": 4820,
+    "name": "Ms Abena Oppong-Asare",
+    "party": "Labour",
+    "constituency": "Erith and Thamesmead",
+    "email": "abena.oppongasare.mp@parliament.uk",
+    "twitter": "https://twitter.com/abenaopp",
+    "profile_url": "https://members.parliament.uk/member/4820"
+  },
+  {
+    "id": 4515,
+    "name": "Kate Osamor",
+    "party": "Labour (Co-op)",
+    "constituency": "Edmonton and Winchmore Hill",
+    "email": "kate.osamor.mp@parliament.uk",
+    "twitter": "https://twitter.com/kateosamor",
+    "profile_url": "https://members.parliament.uk/member/4515"
+  },
+  {
+    "id": 4520,
+    "name": "Matthew Pennycook",
+    "party": "Labour",
+    "constituency": "Greenwich and Woolwich",
+    "email": "matthew.pennycook.mp@parliament.uk",
+    "twitter": "https://twitter.com/mtpennycook",
+    "profile_url": "https://members.parliament.uk/member/4520"
+  },
+  {
+    "id": 4503,
+    "name": "Chris Philp",
+    "party": "Conservative",
+    "constituency": "Croydon South",
+    "email": "chris.philp.mp@parliament.uk",
+    "twitter": "https://twitter.com/CPhilpOfficial",
+    "profile_url": "https://members.parliament.uk/member/4503"
+  },
+  {
+    "id": 5360,
+    "name": "David Pinto-Duschinsky",
+    "party": "Labour",
+    "constituency": "Hendon",
+    "email": "david.pintoduschinsky.mp@parliament.uk",
+    "twitter": "https://x.com/DavidPintoD",
+    "profile_url": "https://members.parliament.uk/member/5360"
+  },
+  {
+    "id": 5229,
+    "name": "Joe Powell",
+    "party": "Labour",
+    "constituency": "Kensington and Bayswater",
+    "email": "joe.powell.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/5229"
+  },
+  {
+    "id": 4268,
+    "name": "Steve Reed",
+    "party": "Labour (Co-op)",
+    "constituency": "Streatham and Croydon North",
+    "email": "steve.reed.mp@parliament.uk",
+    "twitter": "https://twitter.com/SteveReedMP",
+    "profile_url": "https://members.parliament.uk/member/4268"
+  },
+  {
+    "id": 4620,
+    "name": "Ellie Reeves",
+    "party": "Labour",
+    "constituency": "Lewisham West and East Dulwich",
+    "email": "ellie.reeves.mp@parliament.uk",
+    "twitter": "https://twitter.com/elliereeves",
+    "profile_url": "https://members.parliament.uk/member/4620"
+  },
+  {
+    "id": 4764,
+    "name": "Bell Ribeiro-Addy",
+    "party": "Labour",
+    "constituency": "Clapham and Brixton Hill",
+    "email": "bell.ribeiroaddy.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/4764"
+  },
+  {
+    "id": 1447,
+    "name": "Andrew Rosindell",
+    "party": "Reform UK",
+    "constituency": "Romford",
+    "email": "andrew.rosindell.mp@parliament.uk",
+    "twitter": "https://twitter.com/AndrewRosindell",
+    "profile_url": "https://members.parliament.uk/member/1447"
+  },
+  {
+    "id": 5204,
+    "name": "Sarah Sackman",
+    "party": "Labour",
+    "constituency": "Finchley and Golders Green",
+    "email": "sarah.sackman.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/5204"
+  },
+  {
+    "id": 4518,
+    "name": "Tulip Siddiq",
+    "party": "Labour",
+    "constituency": "Hampstead and Highgate",
+    "email": "tulip.siddiq.mp@parliament.uk",
+    "twitter": "https://twitter.com/tulipsiddiq",
+    "profile_url": "https://members.parliament.uk/member/4518"
+  },
+  {
+    "id": 4872,
+    "name": "David Simmonds",
+    "party": "Conservative",
+    "constituency": "Ruislip, Northwood and Pinner",
+    "email": "david.simmonds.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/4872"
+  },
+  {
+    "id": 1516,
+    "name": "Andy Slaughter",
+    "party": "Labour",
+    "constituency": "Hammersmith and Chiswick",
+    "email": "slaughtera@parliament.uk",
+    "twitter": "https://twitter.com/hammersmithandy",
+    "profile_url": "https://members.parliament.uk/member/1516"
+  },
+  {
+    "id": 4514,
+    "name": "Sir Keir Starmer",
+    "party": "Labour",
+    "constituency": "Holborn and St Pancras",
+    "email": "keir.starmer.mp@parliament.uk",
+    "twitter": "https://twitter.com/keir_starmer",
+    "profile_url": "https://members.parliament.uk/member/4514"
+  },
+  {
+    "id": 4504,
+    "name": "Wes Streeting",
+    "party": "Labour",
+    "constituency": "Ilford North",
+    "email": "wes.streeting.mp@parliament.uk",
+    "twitter": "https://twitter.com/wesstreeting",
+    "profile_url": "https://members.parliament.uk/member/4504"
+  },
+  {
+    "id": 5103,
+    "name": "Luke Taylor",
+    "party": "Liberal Democrat",
+    "constituency": "Sutton and Cheam",
+    "email": "luke.taylor.mp@parliament.uk",
+    "twitter": null,
+    "profile_url": "https://members.parliament.uk/member/5103"
+  },
+  {
+    "id": 177,
+    "name": "Gareth Thomas",
+    "party": "Labour (Co-op)",
+    "constituency": "Harrow West",
+    "email": "gareth.thomas.mp@parliament.uk",
+    "twitter": "https://twitter.com/GarethThomasMP",
+    "profile_url": "https://members.parliament.uk/member/177"
+  },
+  {
+    "id": 1536,
+    "name": "Emily Thornberry",
+    "party": "Labour",
+    "constituency": "Islington South and Finsbury",
+    "email": "thornberrye@parliament.uk",
+    "twitter": "https://twitter.com/EmilyThornberry",
+    "profile_url": "https://members.parliament.uk/member/1536"
+  },
+  {
+    "id": 163,
+    "name": "Sir Stephen Timms",
+    "party": "Labour",
+    "constituency": "East Ham",
+    "email": "timmss@parliament.uk",
+    "twitter": "https://twitter.com/stephenctimms",
+    "profile_url": "https://members.parliament.uk/member/163"
+  },
+  {
+    "id": 5282,
+    "name": "Dan Tomlinson",
+    "party": "Labour",
+    "constituency": "Chipping Barnet",
+    "email": "dan.tomlinson.mp@parliament.uk",
+    "twitter": "https://x.com/dan4barnet",
+    "profile_url": "https://members.parliament.uk/member/5282"
+  },
+  {
+    "id": 4523,
+    "name": "Catherine West",
+    "party": "Labour",
+    "constituency": "Hornsey and Friern Barnet",
+    "email": "catherine.west.mp@parliament.uk",
+    "twitter": "https://twitter.com/catherinewest1",
+    "profile_url": "https://members.parliament.uk/member/4523"
+  },
+  {
+    "id": 4776,
+    "name": "Munira Wilson",
+    "party": "Liberal Democrat",
+    "constituency": "Twickenham",
+    "email": "munira.wilson.mp@parliament.uk",
+    "twitter": "https://twitter.com/munirawilson",
+    "profile_url": "https://members.parliament.uk/member/4776"
+  }
+]

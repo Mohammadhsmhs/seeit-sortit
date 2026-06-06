@@ -1,0 +1,34 @@
+{
+  "name": "Broken streetlights near St Thomas' Hospital",
+  "description": "Three streetlights in a row are out on Lambeth Palace Road, between the roundabout and the entrance to St Thomas' Hospital. The whole stretch is completely dark after 9pm. There have been muggings in this area recently and it feels very unsafe for staff leaving the hospital on the night shift. I reported this two weeks ago and nothing has been done.",
+  "photo_description": "Dark residential stretch of road at night. Three consecutive lamp posts visible, all unlit. Contrast with illuminated section further down the road and lit hospital building in background. Pavement is barely visible. A pedestrian silhouette walking on the dark stretch. Road surface wet with no reflections from overhead lighting. Hospital entrance sign partially visible at far end of the dark zone.",
+  "location": {
+    "latitude": 51.4975,
+    "longitude": -0.1185,
+    "address": "Lambeth Palace Road, between roundabout and St Thomas' Hospital entrance",
+    "postcode": "SE1 7EH"
+  },
+  "metadata": {
+    "source": "Based on real FixMyStreet street lighting reports from Lambeth and Westminster. Coordinates place the report on Lambeth Palace Road, approximately 150m from St Thomas' Hospital main entrance.",
+    "expected_category": "Street Lighting and Traffic",
+    "expected_subcategory": "Streetlight Out",
+    "expected_council": "London Borough of Lambeth",
+    "expected_department": "Highways and Transport",
+    "severity_factors": [
+      "Near St Thomas' Hospital (~150m) — staff safety at night",
+      "Multiple lights out (3) creating extended dark zone",
+      "Recent crime in area (muggings mentioned)",
+      "Previously reported 2 weeks ago — no action taken",
+      "Night shift workers affected",
+      "Hazard keywords: dangerous, hospital, urgent",
+      "Escalation candidate: unresolved after 14 days"
+    ],
+    "escalation_path": [
+      "Day 0: Report filed to Lambeth Council Highways",
+      "Day 7: No acknowledgement — automated follow-up email",
+      "Day 14: No action — phone escalation via ElevenLabs + Twilio",
+      "Day 21: If unresolved — formal complaint to Local Government Ombudsman",
+      "Day 30: If unresolved — draft letter to local MP"
+    ]
+  }
+}

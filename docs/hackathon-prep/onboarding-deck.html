@@ -1,0 +1,1230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>London Civic Agent — Team Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0b1d4e;
+    --navy-dark: #06122e;
+    --accent: #ff5722;
+    --green: #2e7d32;
+    --green-soft: #e8f5e9;
+    --amber: #f57f17;
+    --red: #c62828;
+    --grey-50: #fafbfc;
+    --grey-100: #f5f6f8;
+    --grey-200: #ebedf0;
+    --grey-300: #d4d7dd;
+    --grey-600: #6b7280;
+    --grey-800: #2a2d34;
+    --text: #0f1115;
+    --nvidia: #76b900;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    background: var(--grey-50);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Slide container */
+  .slide {
+    min-height: 100vh;
+    padding: 6vh 7vw;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    page-break-after: always;
+  }
+  .slide-num {
+    position: absolute;
+    top: 3vh;
+    right: 3vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    font-weight: 500;
+    color: var(--grey-300);
+    letter-spacing: .05em;
+  }
+  .slide-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.25rem;
+  }
+  .slide-h1 {
+    font-size: clamp(2.5rem, 5.5vw, 4.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.025em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+  .slide-h2 {
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+  .slide-lede {
+    font-size: clamp(1.1rem, 1.55vw, 1.4rem);
+    color: var(--grey-600);
+    max-width: 50ch;
+    line-height: 1.5;
+  }
+  .slide-lede.dark { color: rgba(255,255,255,.75); }
+  .footer-note {
+    position: absolute;
+    bottom: 3vh;
+    left: 7vw;
+    right: 7vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    color: var(--grey-300);
+    letter-spacing: .04em;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* COVER */
+  .cover {
+    background: var(--navy-dark);
+    color: #fff;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255,87,34,.18) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(118,185,0,.12) 0%, transparent 50%);
+  }
+  .cover .slide-eyebrow { color: var(--nvidia); }
+  .cover .cover-title {
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -.04em;
+    color: #fff;
+    margin-bottom: 2.5rem;
+  }
+  .cover .cover-tag {
+    font-size: clamp(1.2rem, 1.8vw, 1.5rem);
+    color: rgba(255,255,255,.7);
+    max-width: 30ch;
+  }
+  .cover .cover-tease {
+    margin-top: 3rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .85rem;
+    color: var(--nvidia);
+    border-top: 1px solid rgba(255,255,255,.12);
+    padding-top: 1.5rem;
+    max-width: 40ch;
+    line-height: 1.7;
+  }
+  .cover .slide-num { color: rgba(255,255,255,.3); }
+  .cover .footer-note { color: rgba(255,255,255,.4); }
+
+  /* AISHA / character slide */
+  .character {
+    background: #fff;
+    border-bottom: 1px solid var(--grey-200);
+  }
+  .character-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 5vw;
+    align-items: center;
+  }
+  .character-portrait {
+    background: linear-gradient(135deg, #fff5f0, #ffe4d4);
+    border-radius: 24px;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 50vh;
+    border: 1px solid #ffd4b8;
+  }
+  .character-portrait .portrait-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    font-weight: 600;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .character-portrait .portrait-name {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin: .5rem 0;
+  }
+  .character-portrait .portrait-details {
+    font-size: 1rem;
+    color: var(--grey-600);
+    line-height: 1.5;
+  }
+  .character-portrait .portrait-quote {
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--text);
+    border-left: 3px solid var(--accent);
+    padding-left: 1.2rem;
+    margin-top: 2rem;
+    line-height: 1.5;
+  }
+  .character-body p { margin-bottom: 1rem; font-size: 1.1rem; color: var(--grey-800); }
+  .character-body p:first-of-type { font-size: 1.25rem; font-weight: 500; color: var(--text); }
+  .character-body .punch { font-weight: 700; color: var(--accent); }
+
+  /* STATS row */
+  .stats {
+    background: #fff;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .stat-card {
+    background: var(--grey-50);
+    border: 1px solid var(--grey-200);
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+  }
+  .stat-card .stat-num {
+    font-size: clamp(2.5rem, 4vw, 3.8rem);
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1;
+    letter-spacing: -.03em;
+    font-feature-settings: 'tnum';
+  }
+  .stat-card .stat-label {
+    font-size: .9rem;
+    color: var(--grey-600);
+    margin-top: .8rem;
+    line-height: 1.4;
+  }
+  .stat-card.bad .stat-num { color: var(--red); }
+  .stat-card .stat-source {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .65rem;
+    color: var(--grey-300);
+    letter-spacing: .03em;
+    margin-top: 1rem;
+    text-transform: uppercase;
+  }
+
+  /* INSIGHT slide */
+  .insight {
+    background: linear-gradient(135deg, #fff, var(--grey-100));
+  }
+  .insight .pull-quote {
+    font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--text);
+    letter-spacing: -.02em;
+    max-width: 22ch;
+    margin-bottom: 2.5rem;
+  }
+  .insight .pull-quote .highlight {
+    color: var(--accent);
+    border-bottom: 4px solid var(--accent);
+    padding-bottom: 4px;
+  }
+  .insight .insight-attribution {
+    font-size: 1rem;
+    color: var(--grey-600);
+    border-left: 3px solid var(--grey-300);
+    padding-left: 1.2rem;
+    max-width: 55ch;
+  }
+  .insight .insight-attribution strong { color: var(--text); }
+
+  /* SOLUTION slide */
+  .solution {
+    background: var(--navy);
+    color: #fff;
+  }
+  .solution .slide-h1 { color: #fff; }
+  .solution .solution-pitch {
+    font-size: clamp(2.5rem, 4.5vw, 3.8rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #fff;
+    letter-spacing: -.02em;
+    margin-bottom: 2rem;
+    max-width: 22ch;
+  }
+  .solution .solution-pitch .ombud {
+    background: linear-gradient(120deg, var(--accent) 0%, #ff8a65 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .solution .solution-sub {
+    font-size: 1.4rem;
+    color: rgba(255,255,255,.7);
+    max-width: 40ch;
+    line-height: 1.5;
+  }
+  .solution .slide-num, .solution .footer-note { color: rgba(255,255,255,.3); }
+
+  /* HOW IT WORKS — flow diagram */
+  .how { background: #fff; }
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+    align-items: stretch;
+  }
+  .flow-step {
+    background: var(--grey-50);
+    border: 1px solid var(--grey-200);
+    padding: 1.5rem 1.25rem;
+    border-radius: 12px;
+    position: relative;
+    transition: transform .2s;
+  }
+  .flow-step:hover { transform: translateY(-3px); border-color: var(--navy); }
+  .flow-step .step-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: .1em;
+  }
+  .flow-step h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: .7rem 0 .5rem;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .flow-step p {
+    font-size: .85rem;
+    color: var(--grey-600);
+    line-height: 1.5;
+  }
+  .flow-step .step-tech {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .65rem;
+    color: var(--nvidia);
+    letter-spacing: .04em;
+    margin-top: 1rem;
+    padding-top: .8rem;
+    border-top: 1px solid var(--grey-200);
+  }
+
+  /* KILLER FEATURE slides */
+  .killer-feature {
+    background: #fff;
+  }
+  .killer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4vw;
+    align-items: center;
+  }
+  .killer-text .slide-eyebrow { color: var(--accent); }
+  .killer-text .killer-h {
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+  .killer-text p {
+    font-size: 1.15rem;
+    color: var(--grey-800);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .killer-text .moat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    color: var(--accent);
+    background: rgba(255,87,34,.08);
+    padding: .6rem .9rem;
+    border-radius: 6px;
+    margin-top: 1.5rem;
+    display: inline-block;
+  }
+  .phone-card {
+    background: linear-gradient(180deg, #0f1115, #1a1d24);
+    color: #fff;
+    border-radius: 28px;
+    padding: 2.5rem;
+    box-shadow: 0 24px 64px rgba(0,0,0,.18);
+    position: relative;
+    overflow: hidden;
+  }
+  .phone-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 0%, rgba(118,185,0,.12), transparent 60%);
+    pointer-events: none;
+  }
+  .phone-call-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .phone-call-row .call-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 0 4px rgba(74,222,128,.2);
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(74,222,128,.2); }
+    50% { box-shadow: 0 0 0 10px rgba(74,222,128,.05); }
+  }
+  .phone-call-row .call-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .75rem;
+    color: rgba(255,255,255,.6);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .phone-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.6rem;
+    color: #fff;
+    font-weight: 600;
+    margin-bottom: 2rem;
+  }
+  .phone-transcript {
+    background: rgba(255,255,255,.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .phone-transcript .who { font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--nvidia); letter-spacing: .1em; text-transform: uppercase; margin-bottom: .5rem; }
+  .phone-transcript .what { font-size: 1rem; color: #fff; line-height: 1.5; }
+  .phone-transcript.them .who { color: #ff9580; }
+
+  /* LEADERBOARD card */
+  .leaderboard-preview {
+    background: #fff;
+    border: 1px solid var(--grey-200);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 12px 40px rgba(11,29,78,.08);
+  }
+  .lb-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: .25rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+  }
+  .lb-beta {
+    background: linear-gradient(135deg, #ff6e40, #ff3d00);
+    color: #fff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .55rem;
+    font-weight: 800;
+    padding: .15rem .4rem;
+    border-radius: 4px;
+    letter-spacing: .1em;
+  }
+  .lb-sub { font-size: .8rem; color: var(--grey-600); margin-bottom: 1.5rem; }
+  .lb-row {
+    display: grid;
+    grid-template-columns: 32px 1fr 70px 70px;
+    gap: .8rem;
+    align-items: center;
+    padding: .85rem 0;
+    border-bottom: 1px solid var(--grey-100);
+    font-size: .9rem;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row .rank {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--grey-100);
+    color: var(--grey-600);
+    font-weight: 700;
+    font-size: .8rem;
+    display: grid;
+    place-items: center;
+  }
+  .lb-row.gold .rank { background: #fde68a; color: #78350f; }
+  .lb-row.silver .rank { background: #e5e7eb; color: #374151; }
+  .lb-row.bronze .rank { background: #fed7aa; color: #7c2d12; }
+  .lb-row .borough-name { font-weight: 600; color: var(--text); }
+  .lb-row .score {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-feature-settings: 'tnum';
+  }
+  .lb-row .score.good { color: var(--green); }
+  .lb-row .score.mid { color: var(--amber); }
+  .lb-row .score.bad { color: var(--red); }
+  .lb-row .pct { color: var(--grey-600); text-align: right; font-family: 'JetBrains Mono', monospace; font-size: .82rem; }
+
+  /* WHY WE WIN */
+  .why-win {
+    background: var(--grey-50);
+    border-bottom: 1px solid var(--grey-200);
+  }
+  .pattern-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+  .pattern-card {
+    background: #fff;
+    border: 1px solid var(--grey-200);
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  .pattern-card .pattern-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--grey-600);
+    margin-bottom: 1rem;
+  }
+  .pattern-card h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 1rem;
+    line-height: 1.3;
+  }
+  .pattern-card .toronto-says {
+    font-size: .9rem;
+    color: var(--grey-600);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--grey-200);
+  }
+  .pattern-card .we-do {
+    font-size: 1rem;
+    color: var(--text);
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .pattern-card .we-do strong { color: var(--accent); }
+
+  /* TEAM / YOUR ROLE */
+  .team {
+    background: linear-gradient(135deg, var(--navy-dark), var(--navy));
+    color: #fff;
+  }
+  .team .slide-h1 { color: #fff; }
+  .team .slide-eyebrow { color: var(--nvidia); }
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .role-card {
+    background: rgba(255,255,255,.04);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    padding: 2rem;
+    color: #fff;
+  }
+  .role-card .role-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    color: var(--nvidia);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .role-card h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.25;
+    margin-bottom: 1rem;
+  }
+  .role-card p {
+    font-size: .95rem;
+    color: rgba(255,255,255,.7);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+  }
+  .role-card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .role-card li {
+    font-size: .9rem;
+    color: rgba(255,255,255,.85);
+    padding: .35rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+  }
+  .role-card li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--nvidia);
+    font-weight: 700;
+  }
+  .team .footer-note, .team .slide-num { color: rgba(255,255,255,.3); }
+
+  /* BET / CALL TO ACTION */
+  .bet {
+    background: var(--navy-dark);
+    color: #fff;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+  .bet .bet-h {
+    font-size: clamp(3rem, 6vw, 5rem);
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.05;
+    letter-spacing: -.03em;
+    max-width: 18ch;
+    margin: 0 auto 2rem;
+  }
+  .bet .bet-h .accent { color: var(--accent); }
+  .bet .bet-sub {
+    font-size: 1.3rem;
+    color: rgba(255,255,255,.7);
+    max-width: 50ch;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+  .bet .bet-cta {
+    margin-top: 4rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .bet .bet-cta .sponsor {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    color: rgba(255,255,255,.4);
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    padding: .8rem 1.4rem;
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 4px;
+  }
+  .bet .slide-num, .bet .footer-note { color: rgba(255,255,255,.3); }
+
+  /* CLOSING / SIGN-OFF */
+  .closing {
+    background: #fff;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+  .closing .closing-mark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .closing .closing-h {
+    font-size: clamp(2.5rem, 4.5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--text);
+    letter-spacing: -.02em;
+    max-width: 25ch;
+    margin: 0 auto 2rem;
+  }
+  .closing .closing-tag {
+    font-size: 1.1rem;
+    color: var(--grey-600);
+    max-width: 40ch;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* TOC navigation overlay */
+  .toc {
+    position: fixed;
+    right: 1.5vw;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: .6rem;
+    z-index: 100;
+    opacity: .35;
+    transition: opacity .2s;
+  }
+  .toc:hover { opacity: 1; }
+  .toc a {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--grey-600);
+    transition: background .15s, transform .15s;
+    text-decoration: none;
+    position: relative;
+  }
+  .toc a:hover { background: var(--accent); transform: scale(1.4); }
+  .toc a.active { background: var(--accent); transform: scale(1.4); }
+  .toc a span {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--navy-dark);
+    color: #fff;
+    padding: .3rem .7rem;
+    border-radius: 4px;
+    font-size: .72rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s;
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+  }
+  .toc a:hover span { opacity: 1; }
+
+  /* PROGRESS bar */
+  .progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    width: 0;
+    z-index: 200;
+    transition: width .2s;
+  }
+
+  /* KEYBOARD hint */
+  .keyboard-hint {
+    position: fixed;
+    bottom: 2vh;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .65rem;
+    color: var(--grey-600);
+    background: rgba(255,255,255,.9);
+    backdrop-filter: blur(8px);
+    padding: .5rem .9rem;
+    border-radius: 99px;
+    border: 1px solid var(--grey-200);
+    letter-spacing: .04em;
+    z-index: 100;
+    opacity: .5;
+    transition: opacity .25s;
+    animation: fadeOut 6s 3s forwards;
+  }
+  @keyframes fadeOut { to { opacity: 0; pointer-events: none; } }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .slide { padding: 5vh 6vw; min-height: auto; }
+    .character-grid, .killer-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .flow { grid-template-columns: 1fr 1fr; }
+    .pattern-grid, .team-grid { grid-template-columns: 1fr; }
+    .toc { display: none; }
+  }
+
+  /* PRINT */
+  @media print {
+    html, body { scroll-snap-type: none; }
+    .slide { min-height: auto; page-break-after: always; padding: 1.5cm; }
+    .toc, .progress, .keyboard-hint { display: none !important; }
+    .cover, .solution, .team, .bet { color: #fff !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<nav class="toc" id="toc">
+  <a href="#s1"><span>Cover</span></a>
+  <a href="#s2"><span>Meet Rebecca</span></a>
+  <a href="#s3"><span>The friction</span></a>
+  <a href="#s4"><span>The data</span></a>
+  <a href="#s5"><span>The insight</span></a>
+  <a href="#s6"><span>What we built</span></a>
+  <a href="#s7"><span>How it works</span></a>
+  <a href="#s8"><span>The phone call</span></a>
+  <a href="#s9"><span>The leaderboard</span></a>
+  <a href="#s10"><span>Why we win</span></a>
+  <a href="#s11"><span>The team</span></a>
+  <a href="#s12"><span>The bet</span></a>
+  <a href="#s13"><span>Sign-off</span></a>
+</nav>
+
+<div class="keyboard-hint">↓ scroll · or use ↑ ↓ ← → keys</div>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 01 — COVER -->
+<section class="slide cover" id="s1">
+  <span class="slide-num">01 / 13</span>
+  <span class="slide-eyebrow">London Civic Agent · onboarding</span>
+  <h1 class="cover-title">Welcome<br>to the team.</h1>
+  <p class="cover-tag">In 48 hours, we will ship a multi-agent AI system that will be the only one in London actually <em>acting</em> on behalf of residents — not just collecting their forms.</p>
+  <p class="cover-tease">NVIDIA Hack for Impact London · 5–7 June 2026<br>Sponsored by NVIDIA · HP · Nebius · ElevenLabs</p>
+  <div class="footer-note"><span>v1.0</span><span>~10 min read</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 02 — MEET AISHA -->
+<section class="slide character" id="s2">
+  <span class="slide-num">02 / 13</span>
+  <div class="character-grid">
+    <div class="character-portrait">
+      <div>
+        <div class="portrait-eyebrow">Our protagonist</div>
+        <div class="portrait-name">Rebecca</div>
+        <div class="portrait-details">
+          Single mum · Tower Hamlets<br>
+          Two kids, one of whom walks to Osmani Primary School every morning at 8:15
+        </div>
+      </div>
+      <div class="portrait-quote">
+        "I just keep reporting it. They don't write back. The mattresses are still there."
+      </div>
+    </div>
+    <div class="character-body">
+      <span class="slide-eyebrow">Why we're here</span>
+      <h2 class="slide-h2">A pile of dumped mattresses, broken furniture and bin bags has been blocking the pavement on Vallance Road for three days.</h2>
+      <p>It's attracting rats. Rebecca and her daughter have to step into the road to walk past.</p>
+      <p>She's reported it <span class="punch">three times</span>. Once via FixMyStreet. Once on the Tower Hamlets website. Once by emailing her local councillor.</p>
+      <p>She has heard <span class="punch">nothing</span> back from anyone.</p>
+      <p>This isn't a hypothetical user. We have FixMyStreet data showing this exact pattern: the same street, reported repeatedly, ignored for months. Our database now holds <strong>6,000+ examples</strong> of Rebeccas across 24 London boroughs.</p>
+    </div>
+  </div>
+  <div class="footer-note"><span>The protagonist matters more than the technology.</span><span>Toronto's winners knew this.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 03 — THE FRICTION -->
+<section class="slide stats" id="s3">
+  <span class="slide-num">03 / 13</span>
+  <span class="slide-eyebrow">The current state</span>
+  <h1 class="slide-h1">Reporting one issue<br>is exhausting.</h1>
+  <p class="slide-lede">We did the user-journey research on every major London council. The friction is real — and it's not just one platform's fault. It's the entire ecosystem.</p>
+
+  <div class="stats-grid">
+    <div class="stat-card bad">
+      <div class="stat-num">8 – 10</div>
+      <div class="stat-label">clicks to file one report</div>
+      <div class="stat-source">Source: tested on Camden, Islington, Westminster, Tower Hamlets</div>
+    </div>
+    <div class="stat-card bad">
+      <div class="stat-num">67 – 146</div>
+      <div class="stat-label">category options to choose from</div>
+      <div class="stat-source">FixMyStreet + Love Clean Streets dropdowns</div>
+    </div>
+    <div class="stat-card bad">
+      <div class="stat-num">3</div>
+      <div class="stat-label">different platforms a single council uses</div>
+      <div class="stat-source">FixMyStreet · Love Clean Streets · bespoke portal</div>
+    </div>
+    <div class="stat-card bad">
+      <div class="stat-num">0</div>
+      <div class="stat-label">London councils with "report" on their homepage</div>
+      <div class="stat-source">Manual audit of all 33 boroughs · June 2026</div>
+    </div>
+  </div>
+  <div class="footer-note"><span>Most users give up at step 4.</span><span>The ones who finish never hear back.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 04 — THE DATA -->
+<section class="slide" id="s4" style="background:#fff;border-bottom:1px solid var(--grey-200);">
+  <span class="slide-num">04 / 13</span>
+  <span class="slide-eyebrow">What the data reveals</span>
+  <h1 class="slide-h1">We scraped 6,107 real<br>FixMyStreet reports.</h1>
+  <p class="slide-lede">Across 24 London boroughs. Every photo. Every council comment. Every state change.<br><br>What we found is bleak.</p>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-num">28 days</div>
+      <div class="stat-label">median resolution time across London — <em>for the lucky ones that get resolved</em></div>
+    </div>
+    <div class="stat-card bad">
+      <div class="stat-num">11 yrs</div>
+      <div class="stat-label">longest-tail report we found — an abandoned scooter reported in 2015, marked fixed in 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">25%</div>
+      <div class="stat-label">of "resolved" reports got zero communication from the council before being marked done</div>
+    </div>
+    <div class="stat-card bad">
+      <div class="stat-num">5.4×</div>
+      <div class="stat-label">gap between best and worst London borough on fly-tipping resolution speed</div>
+    </div>
+  </div>
+  <div class="footer-note"><span>Source: our scraper · live data · queryable in SQLite</span><span>~6,000 reports, growing</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 05 — THE INSIGHT -->
+<section class="slide insight" id="s5">
+  <span class="slide-num">05 / 13</span>
+  <span class="slide-eyebrow">The wedge</span>
+  <p class="pull-quote">The pain isn't<br>the wait.<br>It's the <span class="highlight">silence</span>.</p>
+  <p class="insight-attribution">
+    <strong>Rory Sutherland</strong>, on why Uber was a step-change in user experience: "It didn't make the taxi faster. It told you when the taxi was arriving."<br><br>
+    Same principle, applied to civic complaints. Rebecca can wait 28 days for that mattress to be cleared. What she can't tolerate is silence — not knowing if it'll be tomorrow, next month, or never.<br><br>
+    Every Toronto winner this year — <strong>Belong</strong>, <strong>CityFlow</strong> — won by reducing uncertainty, not by being faster.
+  </p>
+  <div class="footer-note"><span>If we build only one thing perfectly, build this.</span><span>The transparency layer.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 06 — WHAT WE BUILT (the pitch) -->
+<section class="slide solution" id="s6">
+  <span class="slide-num">06 / 13</span>
+  <span class="slide-eyebrow" style="color:var(--nvidia)">Our pitch in one sentence</span>
+  <p class="solution-pitch">Every Londoner just got a <span class="ombud">£200/hour ombudsman</span>.</p>
+  <p class="solution-sub">It takes one photo and one voice note. The agent classifies the issue, scores its severity against cited London data, files it directly to the council's CRM, and doesn't stop chasing until it's fixed — by SMS, by phone call to the council, and ultimately by drafted letter to the Local Government Ombudsman and to the resident's MP.</p>
+  <p class="solution-sub" style="margin-top:2.5rem;color:rgba(255,255,255,.5);font-size:1.1rem;border-top:1px solid rgba(255,255,255,.1);padding-top:2rem;">No clicks. No 146-option dropdowns. No silence. Photos never leave the user's device. All inference runs locally on the NVIDIA hardware.</p>
+  <div class="footer-note"><span>This is the line we lead every conversation with.</span><span>Learn it cold.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 07 — HOW IT WORKS -->
+<section class="slide how" id="s7">
+  <span class="slide-num">07 / 13</span>
+  <span class="slide-eyebrow">How it works</span>
+  <h1 class="slide-h1">Five agents.<br>One protagonist.</h1>
+  <p class="slide-lede">Each agent does one thing well, hands off to the next. The user only sees the start and the end.</p>
+  <div class="flow">
+    <div class="flow-step">
+      <div class="step-num">01 · INTAKE</div>
+      <h3>See the issue</h3>
+      <p>Photo + voice arrive. Vision model classifies the issue. STT extracts the user's description. GPS lifted from EXIF.</p>
+      <div class="step-tech">Qwen2.5-VL · Scribe</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">02 · SEVERITY</div>
+      <h3>Score the impact</h3>
+      <p>RAG over London open data: TfL collision history, school proximity, footfall, census density. Returns a cited severity score.</p>
+      <div class="step-tech">Llama 3.3 70B · RAG</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">03 · ROUTE</div>
+      <h3>Find the owner</h3>
+      <p>Maps borough + category to the correct council department + submission channel. Open311 endpoint, web form, or email.</p>
+      <div class="step-tech">Tool calling</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">04 · SUBMIT</div>
+      <h3>File the report</h3>
+      <p>Posts directly to Camden's Open311 API. No FixMyStreet middleman. The report lands inside the council CRM.</p>
+      <div class="step-tech">Open311 · POST</div>
+    </div>
+    <div class="flow-step">
+      <div class="step-num">05 · ESCALATE</div>
+      <h3>Don't shut up</h3>
+      <p>SLA breached → agent calls the council. Still ignored → drafts letter to LGO and MP. The phone call is the killer demo.</p>
+      <div class="step-tech">ElevenLabs · Twilio</div>
+    </div>
+  </div>
+  <div class="footer-note"><span>Each agent runs locally on the DGX Spark.</span><span>No cloud, no leaks.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 08 — THE PHONE CALL -->
+<section class="slide killer-feature" id="s8">
+  <span class="slide-num">08 / 13</span>
+  <div class="killer-grid">
+    <div class="killer-text">
+      <span class="slide-eyebrow">Killer demo moment #1</span>
+      <h2 class="killer-h">When the council ignores the SLA, the agent picks up the phone.</h2>
+      <p>Two weeks pass. Camden hasn't acknowledged Rebecca's report. The agent doesn't email. It doesn't tweet. It <strong>calls Camden's customer service line</strong>, references the ticket number, asks for an update, logs the response.</p>
+      <p>It's polite. It says it's an automated call on behalf of a resident. It doesn't pretend to be human. It just refuses to disappear.</p>
+      <p class="moat">Zero of 37 Toronto hackathon projects went this far.<br>This is uncopyable in 48 hours.</p>
+    </div>
+    <div class="phone-card">
+      <div class="phone-call-row">
+        <div class="call-dot"></div>
+        <div class="call-label">Live call · Day 14</div>
+      </div>
+      <div class="phone-number">+44 20 7974 4444</div>
+      <div class="phone-transcript">
+        <div class="who">Agent</div>
+        <div class="what">"Hi, this is an automated call on behalf of Rebecca H., a resident in Tower Hamlets. I'm following up on FixMyStreet ticket 3fe301dd — fly-tipping on Vallance Road, reported 14 days ago. Could you confirm the current status?"</div>
+      </div>
+      <div class="phone-transcript them">
+        <div class="who">Camden Council</div>
+        <div class="what">"Let me check that for you... it's been assigned to the team, scheduled for collection on Tuesday."</div>
+      </div>
+      <div class="phone-transcript">
+        <div class="who">Agent</div>
+        <div class="what">"Thank you. I'll let the resident know. Just to confirm — Tuesday 17th, on Vallance Road?"</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-note"><span>Built with ElevenLabs Conversational AI + Twilio.</span><span>Recorded fallback ready in case the live call fails.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 09 — THE LEADERBOARD -->
+<section class="slide killer-feature" id="s9">
+  <span class="slide-num">09 / 13</span>
+  <div class="killer-grid">
+    <div class="killer-text">
+      <span class="slide-eyebrow">Killer demo moment #2</span>
+      <h2 class="killer-h">Public accountability, fairly measured.</h2>
+      <p>A live dashboard ranks every London council on a multi-dimensional scorecard — not just "median resolution days" (unfair to high-volume councils), but a fair composite of resolution rate, speed per category, long-tail burden, and per-category league position vs peers.</p>
+      <p>Councils that respond fast and prioritise the right issues rise to the top. Councils that ignore residents — even with valid excuses — fall. Publicly. Updated daily.</p>
+      <p class="moat">No Toronto entrant built an accountability layer.<br>This is our angle for the Public Services track.</p>
+    </div>
+    <div class="leaderboard-preview">
+      <div class="lb-title">Borough Leaderboard <span class="lb-beta">BETA</span></div>
+      <div class="lb-sub">Fair scorecard · click any column to sort</div>
+      <div class="lb-row gold">
+        <div class="rank">1</div>
+        <div class="borough-name">Greenwich</div>
+        <div class="score good">100.0</div>
+        <div class="pct">100% res.</div>
+      </div>
+      <div class="lb-row silver">
+        <div class="rank">2</div>
+        <div class="borough-name">Southwark</div>
+        <div class="score good">99.7</div>
+        <div class="pct">98% res.</div>
+      </div>
+      <div class="lb-row bronze">
+        <div class="rank">3</div>
+        <div class="borough-name">Bromley</div>
+        <div class="score good">98.5</div>
+        <div class="pct">93% res.</div>
+      </div>
+      <div class="lb-row">
+        <div class="rank">12</div>
+        <div class="borough-name">Islington</div>
+        <div class="score mid">45.5</div>
+        <div class="pct">66% res.</div>
+      </div>
+      <div class="lb-row">
+        <div class="rank">13</div>
+        <div class="borough-name">Camden</div>
+        <div class="score mid">45.3</div>
+        <div class="pct">33% res.</div>
+      </div>
+      <div class="lb-row">
+        <div class="rank">16</div>
+        <div class="borough-name">Barking and Dagenham</div>
+        <div class="score bad">2.0</div>
+        <div class="pct">8% res.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-note"><span>Live demo. Sortable. Methodology disclosed.</span><span>The pressure works.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 10 — WHY WE WIN -->
+<section class="slide why-win" id="s10">
+  <span class="slide-num">10 / 13</span>
+  <span class="slide-eyebrow">Reading the room</span>
+  <h1 class="slide-h1">Toronto already happened.<br>Here's what they rewarded.</h1>
+  <p class="slide-lede">NVIDIA ran the same hackathon in Toronto two weeks ago. 37 projects, six of them civic-complaint clones. None of those six won. The winners shared three patterns. We have all three.</p>
+  <div class="pattern-grid">
+    <div class="pattern-card">
+      <div class="pattern-eyebrow">Pattern 01</div>
+      <h3>Pick a named protagonist.</h3>
+      <p class="toronto-says"><strong>Belong</strong> won Public Services by being for one specific person: a caregiver of someone with dementia. Not "users." Not "society."</p>
+      <p class="we-do"><strong>We have Rebecca.</strong> And every other Londoner exhausted by reporting the same pothole twelve times.</p>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-eyebrow">Pattern 02</div>
+      <h3>Replace something expensive.</h3>
+      <p class="toronto-says"><strong>CityFlow</strong> won Economic Systems by giving small shops a Bloomberg Terminal ($24k/yr) for free. <strong>Belong</strong> replaced live-in care ($60k+/yr).</p>
+      <p class="we-do"><strong>We replace a £200/hour ombudsman</strong> — and the case worker, and the private investigator who chases the council.</p>
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-eyebrow">Pattern 03</div>
+      <h3>Privacy as the headline.</h3>
+      <p class="toronto-says">Both winners led with "your data never leaves the device." Not as a footnote — as the elevator pitch.</p>
+      <p class="we-do"><strong>Rebecca's photo never uploads.</strong> Her address never goes to the cloud. Only the report leaves — and only to the one council that needs it.</p>
+    </div>
+  </div>
+  <div class="footer-note"><span>We are not gambling. We are reading the rubric.</span><span>Toronto told us what to build.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 11 — THE TEAM -->
+<section class="slide team" id="s11">
+  <span class="slide-num">11 / 13</span>
+  <span class="slide-eyebrow">The team</span>
+  <h1 class="slide-h1">Who owns what.<br>No overlap. No drift.</h1>
+  <p class="slide-lede dark">We win when each person focuses on one lane and trusts the others. Hackathons die from context-switching, not under-engineering.</p>
+  <div class="team-grid">
+    <div class="role-card">
+      <div class="role-name">Ongun · Project Lead</div>
+      <h3>The brain</h3>
+      <p>Architecture, agent pipeline, model integration, demo script, judge-facing presentation.</p>
+      <ul>
+        <li>Five agents end-to-end</li>
+        <li>Llama 3.3 + Qwen2.5-VL on the DGX Spark</li>
+        <li>ElevenLabs phone agent</li>
+        <li>RAG over London Datastore</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Teammate 1 · Data + UI</div>
+      <h3>The canvas</h3>
+      <p>The scraper, the SQLite spine, the public dashboard. Without this, nothing is visible.</p>
+      <ul>
+        <li>FixMyStreet scraper across all 33 boroughs</li>
+        <li>Flask + Leaflet dashboard</li>
+        <li>Sleek ticket drawer with photo carousel</li>
+        <li>Sortable scorecard leaderboard</li>
+      </ul>
+    </div>
+    <div class="role-card">
+      <div class="role-name">Teammate 2 · TBC</div>
+      <h3>The wildcard</h3>
+      <p>Likely demo polish, design, or the council-side dashboard. Lane assigned based on skills on Friday.</p>
+      <ul>
+        <li>3-minute demo video</li>
+        <li>Pitch deck for Sunday</li>
+        <li>Recorded fallback for the live phone call</li>
+        <li>Council-side prioritisation view</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-note"><span>Daily standup at 09:00. Lunchtime check-in at 13:00. End-of-day review at 18:00.</span><span>Discipline > heroics.</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 12 — THE BET -->
+<section class="slide bet" id="s12">
+  <span class="slide-num">12 / 13</span>
+  <h1 class="bet-h">We win.<br>Or we ship the<br><span class="accent">best demo</span> we've ever built.</h1>
+  <p class="bet-sub">Either outcome is worth the weekend. NVIDIA has put real hardware in our hands. London has put a real problem in front of us. By Sunday at 17:00 a multi-agent system will exist that didn't this morning — and it will be in production-shaped code.</p>
+  <div class="bet-cta">
+    <span class="sponsor">NVIDIA</span>
+    <span class="sponsor">HP</span>
+    <span class="sponsor">Nebius</span>
+    <span class="sponsor">ElevenLabs</span>
+  </div>
+  <div class="footer-note"><span>5 June 18:00 · setup begins</span><span>7 June 17:00 · presentation</span></div>
+</section>
+
+<!-- ───────────────────────────────────────────────────────────────── -->
+<!-- 13 — SIGN-OFF -->
+<section class="slide closing" id="s13">
+  <span class="slide-num">13 / 13</span>
+  <div class="closing-mark">London Civic Agent</div>
+  <h1 class="closing-h">By 5pm Sunday, this city will know which councils are listening.</h1>
+  <p class="closing-tag">Now go check your task list. Text Ongun with any questions. Let's build it.</p>
+</section>
+
+<script>
+  // Scroll progress bar
+  const progress = document.getElementById('progress');
+  const slides = document.querySelectorAll('.slide');
+  const tocLinks = document.querySelectorAll('.toc a');
+
+  function updateProgress() {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = (scrollTop / docHeight) * 100;
+    progress.style.width = pct + '%';
+  }
+
+  function updateActiveDot() {
+    const middle = window.innerHeight / 2;
+    slides.forEach((slide, i) => {
+      const rect = slide.getBoundingClientRect();
+      const isActive = rect.top <= middle && rect.bottom > middle;
+      if (isActive && tocLinks[i]) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        tocLinks[i].classList.add('active');
+      }
+    });
+  }
+
+  window.addEventListener('scroll', () => {
+    updateProgress();
+    updateActiveDot();
+  });
+
+  // Keyboard navigation
+  let currentSlide = 0;
+  function goToSlide(i) {
+    if (i < 0 || i >= slides.length) return;
+    currentSlide = i;
+    slides[i].scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+      e.preventDefault();
+      // Find current slide
+      const middle = window.innerHeight / 2;
+      slides.forEach((slide, i) => {
+        const rect = slide.getBoundingClientRect();
+        if (rect.top <= middle && rect.bottom > middle) currentSlide = i;
+      });
+      goToSlide(currentSlide + 1);
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      const middle = window.innerHeight / 2;
+      slides.forEach((slide, i) => {
+        const rect = slide.getBoundingClientRect();
+        if (rect.top <= middle && rect.bottom > middle) currentSlide = i;
+      });
+      goToSlide(currentSlide - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      goToSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      goToSlide(slides.length - 1);
+    }
+  });
+
+  updateProgress();
+  updateActiveDot();
+</script>
+
+</body>
+</html>

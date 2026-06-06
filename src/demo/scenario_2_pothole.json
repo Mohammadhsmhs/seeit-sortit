@@ -1,0 +1,27 @@
+{
+  "name": "Dangerous pothole on TfL-managed A205 South Circular",
+  "description": "There is a very deep pothole in the middle lane of the A205 South Circular near the junction with Herne Hill Road. It's about 30cm across and at least 10cm deep. I've seen two cars swerve to avoid it in the last hour. With the rain it fills with water and you can't see it until you're right on top of it. A cyclist could easily come off their bike. This is on a busy main road and needs urgent repair.",
+  "photo_description": "Deep circular pothole in asphalt road surface, middle lane of a dual carriageway. Pothole is roughly 30cm diameter with jagged edges and loose aggregate. Depth estimated at 8-10cm. Standing water partially filling the hole, making it difficult to gauge depth. Surrounding road surface shows additional cracking in a spider-web pattern suggesting subsurface deterioration. White lane markings visible. Traffic cones are not present. Wet road conditions. Multi-lane road with moderate traffic visible in background.",
+  "location": {
+    "latitude": 51.4550,
+    "longitude": -0.0960,
+    "address": "A205 South Circular, near junction with Herne Hill Road",
+    "postcode": "SE24 0AG"
+  },
+  "metadata": {
+    "source": "Based on real FixMyStreet pothole reports from South London. The A205 South Circular is a TfL-managed red route. Coordinates place the report approximately 700m from King's College Hospital.",
+    "expected_category": "Roads and Highways",
+    "expected_subcategory": "Pothole",
+    "expected_council": "Transport for London (TfL)",
+    "expected_department": "TfL Highways",
+    "severity_factors": [
+      "TfL-managed red route (A205 South Circular)",
+      "High traffic volume dual carriageway",
+      "Near King's College Hospital (~700m)",
+      "Hidden hazard when water-filled",
+      "Cyclist safety risk explicitly mentioned",
+      "Hazard keywords: dangerous, urgent, busy road, main road, a-road",
+      "STATS19 data shows collision history on A205 corridor"
+    ]
+  }
+}

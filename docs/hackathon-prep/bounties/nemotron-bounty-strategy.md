@@ -1,0 +1,175 @@
+# Nemotron Bounty — Strategy
+
+> Win condition: **"the team that best integrates NVIDIA Nemotron."** Prize: NVIDIA GeForce RTX 5080.
+>
+> Our angle: Nemotron Super powers the **severity ranking agent** — the hardest reasoning task in our pipeline. Visible, earned, documented.
+
+---
+
+## What the judges are looking for (best guess)
+
+"Best integration" is qualitative. Reading between the lines of NVIDIA's framing, they want:
+
+1. **Nemotron does real work** — not "we hit the API once for a sponsor mention"
+2. **Couldn't have done it without Nemotron** — there's a defensible reason this model specifically
+3. **Visible in the demo** — judges should see "Nemotron" on screen and understand what it just did
+4. **Documented in the README** — Nemotron deserves its own section
+5. **Comparative evidence** — bonus points if we show Nemotron beating Llama 3.3 on a representative task
+
+---
+
+## Our angle: Severity ranking is the Nemotron use case
+
+The severity agent is the **hardest reasoning task** in our pipeline. It must:
+
+1. Read the incoming report (text + classified category + GPS)
+2. Pull 4 cited RAG snippets (STATS19 collision history, schools, hospitals, census density)
+3. Reason about what makes this report severe — *not arithmetic, judgment*
+4. Produce a 0-10 score
+5. Produce a 2-3 sentence rationale citing **specific datasets** ("Osmani Primary is 44m away; 7 serious injuries within 500m on STATS19")
+
+This is a real reasoning task. Llama 3.3 can do it, but Nemotron Super (120B with 12B active MoE) **does it better** — more faithful citations, fewer hallucinated facts, cleaner rationale.
+
+That's the case we make.
+
+---
+
+## Why **Nemotron Super 120B-A12B** specifically
+
+| Model | Why fit | Why not |
+|-------|---------|---------|
+| Nemotron Ultra (~253B) | Most capable | **Doesn't fit on one DGX Spark** (>200B cap). Skip. |
+| **Nemotron Super 120B-A12B (MoE)** | Fits in 128 GB unified memory. Only 12B active params → ~18 tok/s. NVIDIA-branded. | None for our use case. |
+| Nemotron Mini (8B) | Fast | Underpowered for citation-grounded reasoning |
+| Llama 3.3 70B | Drops in via Ollama, well-supported | Doesn't move the Nemotron-bounty needle |
+
+**Decision: severity agent runs on Nemotron Super 120B-A12B.** Everything else (routing, drafting, escalation) starts on Llama 3.3 70B and migrates to Nemotron if we have time.
+
+---
+
+## Architecture (where Nemotron sits)
+
+```
+Intake Agent
+   │ photo, voice, gps, category
+   ▼
+┌─────────────────────────────┐
+│  Severity Agent             │
+│  ┌─────────────────────┐    │
+│  │  Nemotron Super     │ ◄──┼── RAG snippets (STATS19, schools,
+│  │  120B-A12B (Q4)     │    │   hospitals, census)
+│  │  on DGX Spark       │    │
+│  └─────────────────────┘    │
+│  ↓                          │
+│  score (0-10) + 2-3 sentence│
+│  rationale w/ cited sources │
+└─────────────────────────────┘
+   │
+   ▼
+Routing Agent  (Llama 3.3 70B — Nemotron if time)
+   ...
+```
+
+**Visible labels on the dashboard** when a report is processed:
+```
+Severity: 9/10
+  Powered by NVIDIA Nemotron Super 120B-A12B
+  3 schools within 200m · 7 STATS19 serious injuries within 500m · pop density 17,095/km²
+```
+
+That single line on the screen earns us the bounty more than anything else.
+
+---
+
+## Comparative evidence (the killer slide for the bounty)
+
+In the README and the pitch deck, include a side-by-side:
+
+| Same report, same RAG context | Llama 3.3 70B output | Nemotron Super output |
+|-------------------------------|----------------------|------------------------|
+| Score | 8 | 9 |
+| Rationale | "This is near schools and busy roads, so it's important." | "Osmani Primary is 44m from the location; 7 STATS19 serious injuries within 500m suggest a vulnerable-pedestrian corridor. Population density of 17,095/km² compounds exposure." |
+
+Nemotron's rationale **cites specific facts from the RAG context** while Llama paraphrases. That's the comparison we want on screen.
+
+**How to produce this comparison** (Saturday afternoon, 30 min):
+1. Pick 3 representative reports from the scraped DB
+2. Run severity agent twice — once `LLM=llama3.3:70b`, once `LLM=nemotron-super:120b`
+3. Save both outputs to `comparison/severity_llama_vs_nemotron.json`
+4. Screenshot the best one for the README
+
+---
+
+## Visible-in-the-demo placement
+
+Three places Nemotron shows up live:
+
+1. **Dashboard ticket drawer** — "Severity 9/10 · *Powered by NVIDIA Nemotron Super*" line directly under the score
+2. **Live demo segment** — when we show Rebecca's report processing, narrate: *"this severity score and the cited rationale are generated by Nemotron Super, running locally on the Spark"*
+3. **Pitch deck "How it works" slide** — Nemotron logo on the severity-agent box
+
+---
+
+## README section (template)
+
+Add a section to the README:
+
+```markdown
+## Powered by NVIDIA Nemotron Super 120B-A12B
+
+The severity ranking agent — the hardest reasoning task in our pipeline — runs on
+NVIDIA Nemotron Super (120B params, 12B active MoE) deployed locally on the
+DGX Spark.
+
+We use Nemotron specifically because severity ranking requires grounded reasoning
+over four heterogeneous London open datasets (STATS19 collisions, GIAS schools,
+NHS hospitals, Census 2021 density) and must produce a faithfully-cited
+2-3 sentence rationale. Comparative testing on a 3-report sample showed Nemotron
+quoting specific dataset facts (e.g. "Osmani Primary 44m from incident") where
+Llama 3.3 70B paraphrased.
+
+[Screenshot: side-by-side comparison]
+
+Nemotron also powers the escalation agent's persistent context (see
+ElevenLabs Bounty section).
+
+Inference cost: 0 USD. Privacy: full. Runtime: local.
+```
+
+---
+
+## Risk: what if Nemotron doesn't fit alongside the vision model?
+
+- **Symptom:** OOM when loading Nemotron + Qwen2.5-VL simultaneously.
+- **Recovery:**
+  - Time-slice — keep Llama 3.3 + Qwen2.5-VL hot, swap to Nemotron only when severity agent is called, swap back.
+  - Or: run vision on Nebius cloud, keep Nemotron on Spark.
+- **Detection:** Test by 13:00 Saturday. If it doesn't work, swap to Llama 3.3 70B for severity and apply the comparison evidence retroactively (compare 70B output vs a Nemotron API call on build.nvidia.com).
+
+**The bounty section in the README stays.** We pivot the implementation, not the pitch.
+
+---
+
+## What ONLY this bounty needs
+
+- `src/models/nemotron.py` — provider class that points to Nemotron via Ollama (or NIM if the Spark has it pre-pulled)
+- `src/agents/severity.py` — uses the Nemotron provider by default, falls back to Llama on error
+- `comparison/severity_llama_vs_nemotron.json` — the comparative evidence
+- README "Powered by Nemotron" section
+- Dashboard footer label on severity scores
+
+---
+
+## Decision points
+
+- **Sat 11:00** — Nemotron Super pulls successfully on Spark? Yes → proceed. No → use NIM cloud Nemotron endpoint (slower but fine).
+- **Sat 13:00** — Inference latency < 6 sec for a severity call? Yes → use for live demo. No → pre-compute Rebecca's severity output and cache it for the demo.
+- **Sat 17:00** — Comparison evidence captured? Required for the README, not optional.
+
+---
+
+## What we say if a judge asks "why Nemotron over Llama?"
+
+> *"Severity ranking is the only task in our pipeline where the model has to read four open datasets, reason about which facts matter to a vulnerable pedestrian, and cite them in plain English. That's a Nemotron-class reasoning task. Llama got us 80% there — Nemotron's grounded rationale is what makes the dashboard's cited scores trustworthy. We tested both."*
+
+Rehearse that answer.

@@ -1,0 +1,56 @@
+Generate a polite but firm phone call script for following up on an unresolved civic issue with {council}. This script will be read by an AI voice agent (ElevenLabs). Keep sentences short and natural.
+
+Issue: {title}
+Category: {category}
+Reference: {reference}
+Days open: {days_open}
+Department: {department}
+Original report:
+{description}
+
+The script must include these sections in order:
+1. Introduction -- state the caller's name placeholder and reference number
+2. Issue summary -- briefly describe the problem
+3. Time elapsed -- state how long it has been unresolved
+4. Request -- ask for current status and resolution timeline
+5. Escalation warning -- mention formal complaint if no resolution
+6. Close -- request the officer's name and direct contact details
+
+Include [PAUSE] markers for natural pauses and [WAIT_FOR_RESPONSE] markers where the caller should wait for the council's reply.
+
+Respond with ONLY the script text. No commentary before or after.
+
+Example:
+
+PHONE CALL SCRIPT -- Follow-up
+Date: 15 January 2025
+Council: London Borough of Tower Hamlets
+
+[INTRODUCTION]
+Hello, my name is [CALLER_NAME] and I am calling about a civic issue I reported 35 days ago. My reference number is abc123def456.
+
+[PAUSE]
+
+[ISSUE SUMMARY]
+I reported a waste and fly-tipping issue -- specifically, fly-tipping blocking pavement on Vallance Road.
+
+[PAUSE]
+
+[REQUEST]
+It has now been 35 days since I made the report and I have not received any update. Could you please provide me with the current status and a timeline for resolution?
+
+[WAIT_FOR_RESPONSE]
+
+[ESCALATION WARNING]
+If this matter is not resolved within 14 days, I will be submitting a formal complaint through your council's complaints procedure.
+
+[WAIT_FOR_RESPONSE]
+
+[CLOSE]
+Thank you. Could I have your name and direct contact details for my records?
+
+[WAIT_FOR_RESPONSE]
+
+Thank you. I will follow up in writing. Goodbye.
+
+Now generate the script for the issue above.
