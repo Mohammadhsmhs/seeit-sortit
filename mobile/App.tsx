@@ -400,19 +400,35 @@ function CameraScreen({
     ).start();
   }, [ringPulse]);
 
-  const runClassification = async (impact: Haptics.ImpactFeedbackStyle, photoUri?: string) => {
+  const runClassification = async (
+    impact: Haptics.ImpactFeedbackStyle,
+    photoUri?: string,
+    overrideCoords?: { lat: number; lon: number },
+  ) => {
     Haptics.impactAsync(impact);
     setPhase('analysing');
-    // 1) GPS first (~100ms) — sequential so the VLM call can use the coords.
-    const where = await getCoordsAndBorough();
-    setHit(where?.hit ?? null);
+    // 1) Pick coords: prefer the photo's EXIF GPS (where the issue IS) over the
+    //    user's current location (where the user IS RIGHT NOW). Falls back to
+    //    current GPS for fresh Capture, or null if denied.
+    let lat: number | undefined, lon: number | undefined;
+    let resolvedHit: BoroughHit | null = null;
+    if (overrideCoords) {
+      lat = overrideCoords.lat; lon = overrideCoords.lon;
+      resolvedHit = findBoroughForLocation(lat, lon);
+    } else {
+      const where = await getCoordsAndBorough();
+      lat = where?.lat; lon = where?.lon; resolvedHit = where?.hit ?? null;
+    }
+    setHit(resolvedHit);
+    console.log('[Classify] lat:', lat, 'lon:', lon, 'borough:', resolvedHit?.borough.name);
+
     // 2) VLM with grounding hints, parallel with a min 800ms dramatic pause.
     const [vlmReport] = await Promise.all([
       photoUri
         ? submitPhotoForClassification(photoUri, {
-            latitude: where?.lat,
-            longitude: where?.lon,
-            borough: where?.hit?.borough.name,
+            latitude: lat,
+            longitude: lon,
+            borough: resolvedHit?.borough.name,
           })
         : Promise.resolve(null),
       new Promise(r => setTimeout(r, 800)),
@@ -440,7 +456,18 @@ function CameraScreen({
       exif: true,
     });
     if (result.canceled) return;
-    runClassification(Haptics.ImpactFeedbackStyle.Light, result.assets[0]?.uri);
+    const asset = result.assets[0];
+    if (!asset?.uri) return;
+    // For library photos, prefer the photo's own EXIF GPS — it's where the
+    // problem actually IS, not where the user is sitting now.
+    const exif = asset.exif as Record<string, unknown> | undefined;
+    const exifLat = typeof exif?.GPSLatitude === 'number' ? exif.GPSLatitude as number : undefined;
+    const exifLon = typeof exif?.GPSLongitude === 'number' ? exif.GPSLongitude as number : undefined;
+    const overrideCoords =
+      exifLat != null && exifLon != null ? { lat: exifLat, lon: exifLon } : undefined;
+    console.log('[Library] uri:', asset.uri?.slice(0, 60),
+                'has EXIF GPS?', !!overrideCoords, 'exif keys:', exif ? Object.keys(exif).slice(0, 10).join(',') : 'none');
+    runClassification(Haptics.ImpactFeedbackStyle.Light, asset.uri, overrideCoords);
   };
   const onRetake = () => {
     Haptics.selectionAsync();

@@ -64,7 +64,11 @@ export async function submitPhotoForClassification(
   photoUri: string,
   hints: ClassificationHints = {},
 ): Promise<VLMReport | null> {
-  if (!VLM_BASE_URL) return null;
+  if (!VLM_BASE_URL) {
+    console.log('[VLM] base URL empty — using mock fallback');
+    return null;
+  }
+  console.log('[VLM] uri:', photoUri?.slice(0, 60), 'hints:', JSON.stringify(hints));
 
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -92,11 +96,21 @@ export async function submitPhotoForClassification(
       },
       signal: controller.signal,
     });
-    if (!res.ok) return null;
+    console.log('[VLM] response status:', res.status);
+    if (!res.ok) {
+      const body = await res.text().catch(() => '<unreadable>');
+      console.log('[VLM] non-200 body:', body.slice(0, 200));
+      return null;
+    }
     const data = (await res.json()) as VLMReport;
-    if (!data?.analysis) return null;
+    if (!data?.analysis) {
+      console.log('[VLM] missing analysis key in body');
+      return null;
+    }
+    console.log('[VLM] OK — type:', data.analysis.issue_type, 'conf:', data.analysis.confidence, 'borough:', data.enrichment?.borough);
     return data;
-  } catch {
+  } catch (err) {
+    console.log('[VLM] fetch error:', String(err).slice(0, 200));
     return null;
   } finally {
     clearTimeout(t);
