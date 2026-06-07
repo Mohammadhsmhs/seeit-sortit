@@ -686,7 +686,7 @@ function CameraScreen({
                     </View>
                     {vlm?.priority_score != null && (
                       <Text style={{ color: p.inkFaint, fontSize: 11, fontWeight: '700' }}>
-                        score {vlm.priority_score.toFixed(1)}
+                        score {Math.min(10, Math.max(1, vlm.priority_score / 25)).toFixed(1)}/10
                       </Text>
                     )}
                   </View>
