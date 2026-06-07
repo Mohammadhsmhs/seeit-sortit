@@ -706,9 +706,8 @@ function CameraScreen({
         </Pressable>
       </Animated.View>
 
-      {/* Bottom tab bar — hidden while the classification drawer is open
-          so Send / Retake aren't obscured by the tab bar. */}
-      {phase !== 'classified' && <BottomTabBar active="report" onTab={onTab} dark />}
+      {/* Bottom tab bar — same as dashboard */}
+      <BottomTabBar active="report" onTab={onTab} dark />
     </View>
   );
 }
